@@ -1,0 +1,86 @@
+I2MEX: ideal 2-d Magnetohydrodynamic Equilibrium on Xplasma
+===========================================================
+
+I2MEX, by providing a standard equilibrium representation, allows stability
+codes to obtain metric information from a variety of equilibrium sources.
+These include GEQDSK (EFIT format), INP1/inp1.cdf (CHEASE), eqdsk.cdf (JSOLVER)
+as well as TRANSP run data stored on local file system or in the MDSPlus tree.
+
+I2MEX is based on a minimal set of data: the scalar pressure, safety factor, 
+covariant toroidal B field plus the (X, Z) coordinates which are loaded-in at 
+initialization. All metric quantities are computed on the fly on arbitrary, 
+user-specified grids (poloidal angle, poloidal flux/2*pi), using bi-cubic splines.
+
+A. Pletzer (pletzer@pppl.gov)
+
+1) Installation
+---------------
+
+See INSTALL file. 
+
+Normally all you have to do is 
+
+gmake all
+
+This will by default install a library under ../<platform>/lib and a test executable
+ ../<platform>/test/i2mex
+
+Please check that your LD_LIBRARY_PATH variable points to the location of your
+MDSPlus library. Eg, 
+
+setenv LD_LIBRARY_PATH /usr/local/mdsplus/lib:${LD_LIBRARY_PATH} 
+
+under csh, or
+
+LD_LIBRARY_PATH=/usr/local/mdsplus/lib:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH
+
+under bash, sh, and ksh.
+
+
+2) Test run
+-----------
+
+The various supported equilibrium input formats can be checked by running 
+ ../<platform>/test/i2mex. You will need to have the following files accessible:
+INP1, inp1.cdf, g*. To test the MDSPlus capability you will also need permission
+to enable MDSPlus access (contact your local administrator). 
+
+The test program i2mex will dump 3 files: drive.mtv, gserror.dx and mapdsk.cdf
+which can be used to visualize the results. 
+
+If you have plotmtv installed type 
+
+plotmtv drive.mtv
+
+To see the error of the Grad-Shafranov solution using openDX type
+
+export DXDATA=`pwd` (or equivalent under csh)
+dx &
+(then select run "Run visual program")
+(select "gserror.net")
+
+
+The content of mapdsk.cdf can be viewed through matlab, type:
+
+matlab
+mapdsk
+(you will need the netCDF toolbox to be installed, modify mapdsk.m to change 
+this location if necessary).
+
+
+3) mex2eqs
+----------
+   retrieve and map equilibrium data for postprocessing by EQS,
+   the front end to ORBIT
+   Note: you can not use the included inputfiles for the i2mex test program. 
+ 
+4) Documention
+--------------
+
+All methods are documented in index.htm
+
+Good luck!
+
+pletzer@noaa.gov
+
