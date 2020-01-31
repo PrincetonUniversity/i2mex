@@ -1,0 +1,21 @@
+// File: main.cc
+
+#include <${project_name}/${header_file_name}>
+
+#include <fstream>
+#include <ilang/util/log.h>
+
+using namespace ilang;
+
+int main() {
+  // get the ILA model
+  auto ${project_name} = ${top_method_name}("${project_name}");
+
+  // example - export ILA to Verilog
+  ILA_INFO << "Export " << ${project_name} << " to ${project_name}.v";
+  std::ofstream fw("${project_name}.v");
+  ${project_name}.ExportToVerilog(fw);
+  fw.close();
+
+  return 0;
+}

@@ -1,0 +1,15 @@
+// File: ${header_file_name}
+
+#ifndef ${header_guard}
+#define ${header_guard}
+
+#include <ilang/ilang++.h>
+#include <string>
+
+namespace ilang {
+
+Ila ${top_method_name}(const std::string& model_name = "${project_name}");
+
+};
+
+#endif // ${header_guard}
