@@ -9,6 +9,7 @@
 
 OBJ=.
 FC90=ifort
+CC = icc
 
 #FFLAGS += -check underflow -check overflow -check bounds \
 #-warn argument_checking
@@ -25,13 +26,6 @@ Mnams = cont_mod.mod i2mex_mod.mod freeqbe_mod.mod
 Mobjs = cont_mod.o i2mex_mod.o freeqbe_mod.o
 MODS = $(foreach file,$(Mobjs),$(OBJDIR)/$(file))
 
-ifeq ($(MODUP),Y)
- MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
- MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
-else
- MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
-endif 
-
 # library members
 ALLMEM = $(subst .f90,.o, $(wildcard *.f90))
 DFMEM =$(filter-out mex2eqs.o, $(filter-out drive.o, $(ALLMEM)))
@@ -45,19 +39,21 @@ else
 	-lmds_sub -lmdstransp -lxdatmgr -linterp_sub
 endif
 
-#JB LDLIBS2 = -L$(OBJ)/lib $(LLOC) -lesc -llsode -llsode_linpack $(TRXPLIB) \
-#JB 	  -lold_xplasma -lxplasma_debug -lxplasma2 -lgeqdsk_mds -lr8bloat \
-#JB 	  -lsmlib -lmdstransp -lnscrunch -lfluxav \
-#JB 	  -ltrgraf -lpspline -lezcdf \
-#JB 	  -lmclib -lureadsub -lcomput -lvaxonly -llsode -llsode_linpack \
-#JB 	  -lelvislib -lsg -ljc -lportlib 
+LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
+ -lold_xplasma -lxplasma_debug -lxplasma2 -lgeqdsk_mds -lr8bloat \
+ -lsmlib -lmdstransp -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lfluxav \
+ -ltrgraf  -L$(PSPLINE_HOME)/lib -lpspline \
+ -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
+ -L${LAPACK_HOME}/lib -llapack -lrefblas -lezcdf \
+ -lmclib -lureadsub -lcomput -lvaxonly -llsode -llsode_linpack \
+ -lelvislib -lsg -ljc -lportlib 
 
 LDLIBS = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lold_xplasma -lxplasma2 -lgeqdsk_mds -lr8bloat -lmdstransp \
  -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lsmlib -lfluxav -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
  -L${LAPACK_HOME}/lib -llapack -lrefblas -lezcdf -lmclib \
- -lcomput -lvaxonly -lportlib  
+ -lcomput -lvaxonly -lportlib
 
 libs: chkdirs $(ARC)
 
@@ -78,21 +74,26 @@ chkdirs:
 # compile f90
 $(OBJDIR)/%.o: %.f90
 	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o $(OBJDIR)/$*.o $<
-#	ar -r $(ARC) $(OBJDIR)/$*.o
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
 
 $(ARC): $(MODS) $(MEM)
 	ar -r $(ARC) $(MODS) $(MEM)
 	cp -u *.mod $(OBJ)/mod
 
 #JB exec: $(OBJ)/test/i2mex $(OBJ)/test/mex2eqs makelink 
-exec: $(OBJ)/bin/i2mex
+exec: $(OBJ)/bin/i2mex $(OBJ)/bin/mex2eqs
 
 $(OBJ)/bin/i2mex: $(OBJDIR)/drive.o $(ARC)
 	$(FC90) $(LDFLAGS) -o $@ $< $(ARC) $(LDLIBS)
 
+$(OBJ)/bin/mex2eqs: $(OBJDIR)/mex2eqs.o readline.o $(ARC)
+	$(FC90) $(LDFLAGS) -o $@ $< readline.o $(ARC) $(LDLIBS2)
+
 clean:
-	@rm -f $(OBJDIR)/*
+	@rm -f $(OBJDIR)/* readline.o
 	@rm -f $(OBJ)/mod/*
 	@rm -f *.mod
-	@rm -f $(OBJ)/bin/i2mex
+	@rm -f $(OBJ)/bin/*
 	@rm -f $(ARC)
