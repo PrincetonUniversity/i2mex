@@ -3,9 +3,7 @@
 #
 #12/04/00 C. Ludescher
 #Modified 01/31/20 J. Breslau
-#module load intel/2019.u3; module load ntcc/stable lapack mdsplus pspline
-#module load szip
-#module load hdf hdf5-serial netcdf-c netcdf-fortran 
+#module load intel; module load ntcc lapack mdsplus
 
 OBJ=.
 FC90=ifort
