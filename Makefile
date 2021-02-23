@@ -4,10 +4,12 @@
 #12/04/00 C. Ludescher
 #Modified 01/31/20 J. Breslau
 #module load intel; module load ntcc/stable lapack mdsplus
+# or
+#module load gcc; module load ntcc/unstable lapack mdsplus
 
 OBJ=.
-FC90=ifort
-CC = icc
+FC90=$(F90)
+CCC =$(CC)
 
 #FFLAGS += -check underflow -check overflow -check bounds \
 #-warn argument_checking
@@ -42,7 +44,7 @@ LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lsmlib -lmdstransp -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lfluxav \
  -ltrgraf  -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
- -L${LAPACK_HOME}/lib -llapack -lrefblas -lezcdf \
+ -L${LAPACK_HOME}/lib -llapack -lblas -lezcdf \
  -lmclib -lureadsub -lcomput -lvaxonly -llsode -llsode_linpack \
  -lelvislib -lsg -ljc -lportlib 
 
@@ -50,7 +52,7 @@ LDLIBS = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lold_xplasma -lxplasma2 -lgeqdsk_mds -lr8bloat -lmdstransp \
  -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lsmlib -lfluxav -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
- -L${LAPACK_HOME}/lib -llapack -lrefblas -lezcdf -lmclib \
+ -L${LAPACK_HOME}/lib -llapack -lblas -lezcdf -lmclib \
  -lcomput -lvaxonly -lportlib
 
 libs: chkdirs $(ARC)
@@ -74,7 +76,7 @@ $(OBJDIR)/%.o: %.f90
 	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o $(OBJDIR)/$*.o $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CCC) $(CFLAGS) -c $<
 
 $(ARC): $(MODS) $(MEM)
 	ar -r $(ARC) $(MODS) $(MEM)
