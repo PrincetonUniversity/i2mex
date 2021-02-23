@@ -3,7 +3,7 @@
 #
 #12/04/00 C. Ludescher
 #Modified 01/31/20 J. Breslau
-#module load intel; module load ntcc lapack mdsplus
+#module load intel; module load ntcc/stable lapack mdsplus
 
 OBJ=.
 FC90=ifort
