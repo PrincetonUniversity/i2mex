@@ -32,13 +32,13 @@ subroutine eqm_ball(ivec,zR,zZ,zphi,init,BR,BZ,BPHI,zpsi,ipsi,ierr)
   integer ipsi                      ! =0 returned, no psi(poloidal) flag
   !  Psi is input, not output, in this routine.
 
-  integer ierr                      ! completion code, 0=OK
+  integer, intent(out) :: ierr      ! completion code, 0=OK
 
   !--------------------------------
 
   real*8, dimension(:), allocatable :: zg,zrho,zchi,zRloc,zZloc,zdeti
   real*8, dimension(:,:), allocatable :: f2,f5
-  real*8 zRaxis,zZaxis,zdum
+  real*8 zRaxis,zZaxis,zdum  ,reltol,oldreltol
 
   logical ioutsid(ivec),axisymm
 
@@ -48,7 +48,7 @@ subroutine eqm_ball(ivec,zR,zZ,zphi,init,BR,BZ,BPHI,zpsi,ipsi,ierr)
   integer :: id2(2),idR(2),idZ(2)
   integer,parameter :: idRdth=1,idRdrho=2,idZdth=3,idZdrho=4,idpsidrho=5
 
-  integer :: nsnccwb,nsnccwi
+  integer :: nsnccwb,nsnccwi, nR,nZ
 
   integer ivecin,ivecout
   integer, dimension(:), allocatable :: iregion
@@ -97,6 +97,32 @@ subroutine eqm_ball(ivec,zR,zZ,zphi,init,BR,BZ,BPHI,zpsi,ipsi,ierr)
              ' ?eqm_ball: R & Z external grids must be defined first.')
         ierr=615
         go to 900
+     endif
+
+     ! Create fastmap with adjustable tolerances, so xplasma_brz won't
+     ! choke on it later.
+     call xplasma_find_item(sp,'__FASTMAP',id_map,ierr,nf_noerr=.TRUE.)
+     if (id_map.eq.0) then
+        call xplasma_grid_size(sp,id_Rgrid,nR,ierr)
+        call xplasma_grid_size(sp,id_Zgrid,nZ,ierr)
+        call xplasma_global_info(sp, ierr, bdytol=reltol)
+        oldreltol = reltol
+        do
+           call eqi_fastinv_gen(id_Rgrid,id_Zgrid,nR,nZ,id_map,ierr)
+           if (ierr.eq.0) then
+              print *,' eqi_fastinv_gen converged.'
+              exit
+           endif
+           reltol = 10.0d0 * reltol
+           if (reltol.gt.1.0d-4) then
+              call xplasma_errmsg_append(sp, 'fastinv convergence failure.')
+              ierr = 615
+              go to 900
+           endif
+           print *,' fastinv convergence failure; relaxing tol to ',reltol
+           call xplasma_bdytol_set(sp, reltol, ierr)
+        enddo
+        call xplasma_bdytol_set(sp, oldreltol, ierr)
      endif
 
      call xplasma_mag_axis(sp,ierr, zRaxis,zZaxis)
