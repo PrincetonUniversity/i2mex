@@ -48,8 +48,7 @@ subroutine i2mex_ReadEquilibrium(inputFormat, inputFile, it_orientation, ier)
         call i2mex_fromGeqdsk(inputFile, it_orientation, ier)
         call i2mex_error(ier)
      case(4)
-        !call i2mex_fromGeqdskThruEscQ(inputFile, it_orientation, ier) ESC deleted - JAB 1/20
-        ier = 176
+        call i2mex_fromGeqdsk(inputFile, it_orientation, ier)
         call i2mex_error(ier)
      case(5)
         call i2mex_fromMenard(inputFile, it_orientation, ier)

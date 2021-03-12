@@ -53,7 +53,7 @@ program mex2eqs
   real(r8), dimension(:), allocatable :: Rgrid, Zgrid, Psigrid
   real(r8), allocatable :: Rcoord(:,:), Zcoord(:,:), psiRZ(:,:),BRBZBPhi(:,:,:)
   integer, allocatable :: nregion(:)
-  external eqm_brz_adhoc, eqm_bpsi
+  external eqm_brz_adhoc, eqm_bpsi, eqm_ball
 
   call uinita(0)
   nths = 133
@@ -124,7 +124,7 @@ program mex2eqs
      write(lnout(0),*)' +1  for CHEASE inp1.cdf format'
      write(lnout(0),*)' +2  for JSOLVER eqdsk.cdf format'
      write(lnout(0),*)' +3  for EFIT G-EQDSK format'
-     write(lnout(0),*)' +4  for EFIT G-EQDSK format, rerunning equilibrium through ESC-Q'
+     write(lnout(0),*)' +4  for EFIT G-EQDSK format, using G-EQDSK vacuum psi'
      write(lnout(0),*)' +5  for Menard''s psipqgRZ netCDF format'
      write(lnout(0),*)' +6  for Belova''s freeqbe netCDF format'
  
@@ -172,11 +172,12 @@ program mex2eqs
         write(lnout(0),*) ' path is:'
         write(lnout(0),*) ' MDS+/REDUCE:SKYLARK.PPPL.GOV:8501:EFIT06(116313;t=0.9)'
      endif
+     IF (InputFormat==4) i2mex_direct = 1  ! direct representation psi(R,z)
      CALL UREADLL('Enter file name or MDSPlus path$',inputFile)
  
      write(lnout(0),*) ' InputFormat = ', InputFormat, ' inputFile: ', inputFile
      call i2mex_ReadEquilibrium(inputFormat, inputFile, i2mex_clockwise, ier)
- 
+
   endif
  
   call i2mex_error(ier)
@@ -307,7 +308,7 @@ program mex2eqs
  deltaN = max(0.01_r8, R8DCOD(IER))
  
  ! Build direct representation 
- 
+
  if((InputFormat==3 .OR. InputFormat==4) .AND. i2mex_direct>0) then
 
     ! -> Use psi(r,z) data from EFIT file. In this case the psi(r,z)
@@ -333,7 +334,7 @@ program mex2eqs
 
     ! now compute br, bz, bphi
     edge_smoothing = 0.05_r8
-     call eqm_brz(eqm_bpsi, edge_smoothing, ier)
+     call eqm_brz(eqm_ball, edge_smoothing, ier)
 
  else
 
@@ -363,7 +364,6 @@ program mex2eqs
 
     edge_smoothing = 0.05
     call eqm_brz(eqm_brz_adhoc, edge_smoothing, ier)
-
  endif
  if(ier/=0) print*,'**Error after eqm_brz', ier
 
@@ -390,7 +390,13 @@ program mex2eqs
  BRBZBPhi = -BRBZBPhi
 
  ! get Psi on R Z grid
- call eq_fRZ(NR*NZ, Rcoord(1,1), Zcoord(1,1), 1, i2mex_o%id_psi, NR*NZ, psiRZ(1,1), ier)
+ if (i2mex_direct.eq.1) then
+    call eq_fRZ(NR*NZ, Rcoord(1,1), Zcoord(1,1), 1, i2mex_o%id_psirz, &
+         NR*NZ, psiRZ(1,1), ier)
+ else
+    call eq_fRZ(NR*NZ, Rcoord(1,1), Zcoord(1,1), 1, i2mex_o%id_psi, &
+         NR*NZ, psiRZ(1,1), ier)
+ endif
  if(ier/=0) print*,'**Error after eq_fRZ'
 
    

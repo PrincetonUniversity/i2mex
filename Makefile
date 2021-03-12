@@ -30,7 +30,8 @@ MODS = $(foreach file,$(Mobjs),$(OBJDIR)/$(file))
 ALLMEM = $(subst .f90,.o, $(wildcard *.f90))
 DFMEM =$(filter-out mex2eqs.o, $(filter-out drive.o, $(ALLMEM)))
 FMEM =$(filter-out cont_mod.o, $(filter-out freeqbe_mod.o, $(DFMEM)))
-MEM = $(foreach m,$(FMEM),$(OBJDIR)/$(m))
+BMEM =$(filter-out eqm_ball.o, $(FMEM))
+MEM = $(foreach m,$(BMEM),$(OBJDIR)/$(m))
 
 ifdef NO_TRXPLIB
       TRXPLIB= -lgeneric_dummy
@@ -88,8 +89,8 @@ exec: $(OBJ)/bin/i2mex $(OBJ)/bin/mex2eqs
 $(OBJ)/bin/i2mex: $(OBJDIR)/drive.o $(ARC)
 	$(FC90) $(LDFLAGS) -o $@ $< $(ARC) $(LDLIBS)
 
-$(OBJ)/bin/mex2eqs: $(OBJDIR)/mex2eqs.o readline.o $(ARC)
-	$(FC90) $(LDFLAGS) -o $@ $< readline.o $(ARC) $(LDLIBS2)
+$(OBJ)/bin/mex2eqs: $(OBJDIR)/mex2eqs.o $(OBJDIR)/eqm_ball.o readline.o $(ARC)
+	$(FC90) $(LDFLAGS) -o $@ $< $(OBJDIR)/eqm_ball.o readline.o $(ARC) $(LDLIBS2)
 
 clean:
 	@rm -f $(OBJDIR)/* readline.o

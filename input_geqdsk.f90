@@ -207,7 +207,12 @@ subroutine i2mex_fromGeqdsk(filename, it_orientation, ier)
         i2mex_o%Rrigh = xmax
         i2mex_o%Zbot = zmin
         i2mex_o%Ztop = zmax
-        
+
+        call eqm_cbdy(5, &
+             & (/xmin, xmax, xmax, xmin, xmin /), &
+             & (/zmin, zmin, zmax, zmax, zmin /), &
+             & iok)
+        if(iok/=0) ier = 154
 
         call eqm_rzgrid(xgrid, zgrid, -1, -1, geq%NW, geq%NH, ztol, &
              & i2mex_o%id_Rgrid, i2mex_o%id_Zgrid, iok)
@@ -216,15 +221,8 @@ subroutine i2mex_fromGeqdsk(filename, it_orientation, ier)
            call i2mex_error(ier)
         endif
 
-        call eqm_cbdy(5, &
-             & (/xmin, xmax, xmax, xmin, xmin /), &
-             & (/zmin, zmin, zmax, zmax, zmin /), &
-             & iok)
-        if(iok/=0) ier = 154
-
-  
         ! interpolation order is Akima
-        call eqm_rzfunda('PSI', i2mex_o%id_psirz, geq%psirz_Wb__Rad, &
+        call eqm_rzfunda('PSIRZ', i2mex_o%id_psirz, geq%psirz_Wb__Rad, &
              & geq%NW, geq%NH, i2mex_akima, delta, iok)
         if(iok/=0) ier = 153
   endif

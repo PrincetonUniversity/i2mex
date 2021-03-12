@@ -53,7 +53,7 @@
 
        print *,'*** use direct representation for grad psi '
 
-       call eq_gRZ(nt1*ns, x(1,1), z(1,1), 1, i2mex_o%id_psi, nt1*ns, grad_psi, iok)
+       call eq_gRZ(nt1*ns, x(1,1), z(1,1), 1, i2mex_o%id_psirz, nt1*ns, grad_psi, iok)
        if(iok/=0) ier = 155
 
        gpp = grad_psi(:,:,1)**2 + grad_psi(:,:,2)**2
