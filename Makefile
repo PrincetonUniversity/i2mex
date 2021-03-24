@@ -76,6 +76,9 @@ chkdirs:
 $(OBJDIR)/%.o: %.f90
 	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o $(OBJDIR)/$*.o $<
 
+util/%.o: util/%.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o util/$*.o $<
+
 %.o: %.c
 	$(CCC) $(CFLAGS) -c $<
 
@@ -83,13 +86,12 @@ $(ARC): $(MODS) $(MEM)
 	ar -r $(ARC) $(MODS) $(MEM)
 	cp -u *.mod $(OBJ)/mod
 
-#JB exec: $(OBJ)/test/i2mex $(OBJ)/test/mex2eqs makelink 
 exec: $(OBJ)/bin/i2mex $(OBJ)/bin/mex2eqs
 
-$(OBJ)/bin/i2mex: $(OBJDIR)/drive.o $(ARC)
+$(OBJ)/bin/i2mex: util/drive.o $(ARC)
 	$(FC90) $(LDFLAGS) -o $@ $< $(ARC) $(LDLIBS)
 
-$(OBJ)/bin/mex2eqs: $(OBJDIR)/mex2eqs.o $(OBJDIR)/eqm_ball.o readline.o $(ARC)
+$(OBJ)/bin/mex2eqs: util/mex2eqs.o $(OBJDIR)/eqm_ball.o readline.o $(ARC)
 	$(FC90) $(LDFLAGS) -o $@ $< $(OBJDIR)/eqm_ball.o readline.o $(ARC) $(LDLIBS2)
 
 clean:
@@ -98,3 +100,4 @@ clean:
 	@rm -f *.mod
 	@rm -f $(OBJ)/bin/*
 	@rm -f $(ARC)
+	@rm -f $(OBJ)/util/*.o
