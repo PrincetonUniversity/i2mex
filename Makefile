@@ -33,12 +33,8 @@ FMEM =$(filter-out cont_mod.o, $(filter-out freeqbe_mod.o, $(DFMEM)))
 BMEM =$(filter-out eqm_ball.o, $(FMEM))
 MEM = $(foreach m,$(BMEM),$(OBJDIR)/$(m))
 
-ifdef NO_TRXPLIB
-      TRXPLIB= -lgeneric_dummy
-else
-      TRXPLIB=-ltrxplib -ltrread -ltr_getnl -lrp_kernel -lrplot_io \
+TRXPLIB=-ltrxplib -ltrread -ltr_getnl -lrp_kernel -lrplot_io \
 	-lmds_sub -lmdstransp -lxdatmgr -linterp_sub
-endif
 
 LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lold_xplasma -lxplasma_debug -lxplasma2 -lgeqdsk_mds -lr8bloat \
