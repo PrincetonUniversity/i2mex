@@ -3,9 +3,9 @@
 #
 #12/04/00 C. Ludescher
 #Modified 01/31/20 J. Breslau
-#module load intel; module load ntcc/stable lapack mdsplus
+#module load intel; module load mod_ntcc; module load ntcc
 # or
-#module load gcc; module load ntcc/unstable lapack mdsplus
+#module load gcc; module load mod_ntcc; module load ntcc/gcc
 
 OBJ=.
 FC90=$(F90)
@@ -36,8 +36,8 @@ MEM = $(foreach m,$(BMEM),$(OBJDIR)/$(m))
 ifdef NO_TRXPLIB
       TRXPLIB= -lgeneric_dummy
 else
-      TRXPLIB=-ltrxplib -ltrread -ltr_getnl -lrp_kernel -lrplot_io \
-	-lmds_sub -lmdstransp -lxdatmgr -linterp_sub
+      TRXPLIB=-ltrxplib -ltrread -ltr_getnl -lrp_kernel -lrplot_mod -lrplot_io \
+	-lureadsub -lmds_sub -lmdstransp -ltokyr -lxdatmgr -linterp_sub
 endif
 
 LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
@@ -47,7 +47,7 @@ LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
  -L${LAPACK_HOME}/lib -llapack -lblas -lezcdf \
  -lmclib -lureadsub -lcomput -lvaxonly -llsode -llsode_linpack \
- -lelvislib -lsg -ljc -lportlib 
+ -lsg -ljc -lportlib 
 
 LDLIBS = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lold_xplasma -lxplasma2 -lgeqdsk_mds -lr8bloat -lmdstransp \
