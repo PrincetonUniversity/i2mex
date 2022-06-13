@@ -19,9 +19,11 @@ OBJC := $(SRCC:%.c=$(OBJDIR)/%.o)
 
 FDEF := $(FDEFS)
 FINC := $(FINCL) -I$(NETCDF_FORTRAN_HOME)/include -I$(PSPLINE_HOME)/include
+FFLG := $(FFLAGS)
 
 CDEF := $(CDEFS)
 CINC := $(CINCL)
+CFLG := $(CFLAGS)
 
 
 .PHONY: clean realclean clobber check
@@ -33,19 +35,19 @@ check:
 	@test -d $(LOCAL)/obj/$(NAME) || mkdir -p $(LOCAL)/obj/$(NAME)
 
 $(NAME): $(OBJF) $(OBJC)
-	@echo "Building $(LIBAR) static library"
+	@echo "Building $(NAME) static library"
 	@ar rcs $(LIBAR) $(OBJF) $(OBJC)
 ifeq ($(MAKE_SO),1)
-	@echo "Building $(LIBSO) shared library"
+	@echo "Building $(NAME) shared library"
 	@$(FC) -shared $(LDFLAGS) -o $(LIBSO) $(OBJF) $(OBJC)
 endif
 
 include $(NAME)_depend.mk
 $(OBJDIR)/%.o: %.f90
-	@$(FC) -fPIC $(FFLAGS) $< -o $@ $(FDEF) $(FINC) $(MFLAG) $(LOCAL)/mod
+	@$(FC)  $(FFLG) $< -o $@ $(FDEF) $(FINC) $(MFLAG) $(LOCAL)/mod
 
 $(OBJDIR)/%.o: %.c
-	@$(CC) -fPIC $(CFLAGS) $< -o $@ $(CDEF) $(CINC)
+	@$(CC)  $(CFLG) $< -o $@ $(CDEF) $(CINC)
 
 clean: 
 	@rm -f $(OBJDIR)/*.o
