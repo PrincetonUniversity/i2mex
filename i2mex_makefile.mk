@@ -36,7 +36,7 @@ check:
 
 $(NAME): $(OBJF) $(OBJC)
 	@echo "Building $(NAME) static library"
-	@ar rcs $(LIBAR) $(OBJF) $(OBJC)
+	@$(AR) $(LIBAR) $(OBJF) $(OBJC)
 ifeq ($(MAKE_SO),1)
 	@echo "Building $(NAME) shared library"
 	@$(FC) -shared $(LDFLAGS) -o $(LIBSO) $(OBJF) $(OBJC)
