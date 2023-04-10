@@ -18,7 +18,7 @@ SRCC := $(wildcard *.c)
 OBJC := $(SRCC:%.c=$(OBJDIR)/%.o)
 
 FDEF := $(FDEFS)
-FINC := $(FINCL) -I$(NETCDF_FORTRAN_HOME)/include -I$(PSPLINE_HOME)/include
+FINC := $(FINCL) -I$(NETCDF_FORTRAN_HOME)/include -I$(PSPLINE_HOME)/include -I$(EZCDF_HOME)/mod
 FFLG := $(FFLAGS)
 
 CDEF := $(CDEFS)

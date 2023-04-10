@@ -41,16 +41,18 @@ LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lsmlib -lmdstransp -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lfluxav \
  -ltrgraf  -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
- -L${LAPACK_HOME}/lib -llapack -lblas -lezcdf \
+ -L${LAPACK_HOME}/lib -llapack -lblas \
  -lmclib -lureadsub -lcomput -lvaxonly -llsode -llsode_linpack \
- -lsg -ljc -lportlib 
+ -lsg -ljc -lportlib \
+ -L$(EZCDF_HOME)/lib -ezcdf
 
 LDLIBS = -L$(OBJ)/lib -L$(NTCC_HOME)/lib -llsode -llsode_linpack $(TRXPLIB) \
  -lold_xplasma -lxplasma2 -lgeqdsk_mds -lr8bloat -lmdstransp \
  -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lsmlib -lfluxav -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
- -L${LAPACK_HOME}/lib -llapack -lblas -lezcdf -lmclib \
- -lcomput -lvaxonly -lportlib
+ -L${LAPACK_HOME}/lib -llapack -lblas -lmclib \
+ -lcomput -lvaxonly -lportlib \
+ -L$(EZCDF_HOME)/lib -ezcdf
 
 libs: chkdirs $(ARC)
 
