@@ -1,6 +1,7 @@
 $(OBJDIR)/cont_mod.o : cont_mod.f90 
 $(OBJDIR)/freeqbe_mod.o : freeqbe_mod.f90 
 $(OBJDIR)/i2mex_mod.o : i2mex_mod.f90 
+$(OBJDIR)/imex_ode_mod.o : imex_ode_mod.f90
 $(OBJDIR)/delta.o : delta.f90 $(OBJDIR)/i2mex_mod.o 
 $(OBJDIR)/contour.o : contour.f90 $(OBJDIR)/cont_mod.o 
 $(OBJDIR)/eqm_ball.o : eqm_ball.f90 $(OBJDIR)/i2mex_mod.o 

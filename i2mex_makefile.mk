@@ -9,7 +9,7 @@ OBJDIR := $(LOCAL)/obj/$(NAME)
 LIBAR := $(LOCAL)/lib/lib$(NAME).a
 LIBSO := $(LOCAL)/lib/lib$(NAME).so
 
-MODS := cont_mod.mod freeqbe_mod.mod i2mex_mod.mod
+MODS := cont_mod.mod freeqbe_mod.mod i2mex_mod.mod imex_ode_mod.mod
 SRCM := $(MODS:%.mod=%.f90)
 SRCF := $(SRCM) $(filter-out $(SRCM), $(wildcard *.f90))
 OBJF := $(SRCF:%.f90=$(OBJDIR)/%.o)
