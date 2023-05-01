@@ -14,6 +14,7 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
 
   
   use cont_mod
+  use imex_ode_mod
 
   implicit none
   integer, parameter :: r8 = selected_real_kind(12,100)
@@ -27,7 +28,7 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
   integer, intent(out) :: ier
 
   integer, parameter :: neq=2, mf=10
-  integer itol, itask, istate, iopt, lrw, iwork(20), liw
+  integer istate, iwork(5)
   real(r8) atol, rtol
 
   real(r8) :: fs(ns) ! diagnostics
@@ -49,10 +50,9 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
   type(ezspline1) :: xspl, yspl
   integer::             zsts
 
-  external i2mex_xydot, i2mex_jac
+  external i2mex_xydot
 
   ier = 0
-  iopt = 0
 
 
   call ezspline_init(fspl, nx, ny, (/0,0/), (/0,0/), iok)
@@ -64,15 +64,10 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
   call ezspline_setup(fspl, f, iok)
   call ezspline_error(iok)
 
-  ! lsode stuff
+  ! imex_ode stuff
   rtol=1.e-12_r8
   atol=1.e-12_r8
-  itask = 1
   istate = 1
-  itol = 1
-  iopt = 0
-  lrw  = 20 + 16*neq
-  liw = 20
 
   allocate(dx(neq), dxnew(neq), xx(neq), xx0(neq), aa(nsteps))
   allocate( xy(neq, nsteps),stat=zsts)
@@ -110,15 +105,15 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
 !!$   t = 0.0_r8
 !!$   xx = (/xp, yp/)
   
-  allocate(rwork(20 + 16*neq),stat=zsts)
+  allocate(rwork(100 + 21*neq),stat=zsts)
 
   do while (npoints < nsteps-1 .and. abs(const*dt) > eps)
      dx = xx - xx0
      tout = t + const*dt
-     call lsode_r8 (i2mex_xydot, neq, xx, t, tout, itol, rtol, atol, itask, &
-          & istate, iopt, rwork, lrw, iwork, liw, i2mex_jac, mf)
-     if(istate<=0) then
-        print *,'LSODE error', istate
+     call imex_ode (i2mex_xydot, neq, xx, t, tout, rtol, atol, &
+          & istate, rwork, iwork)
+     if(istate/=2) then
+        print *,'IMEX_ODE error', istate
      endif
      dxnew = xx - xx0
      vecprod = dx(1)*dxnew(2)-dx(2)*dxnew(1)
@@ -139,7 +134,7 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
         const = const/2._r8
         angle = angle - a
         xx = xy(:,npoints)
-        ! reset lsode state
+        ! reset imex_ode state
         istate = 1
      else if(const==1._r8) then
         npoints = npoints + 1 ! foward counter
@@ -232,14 +227,14 @@ subroutine i2mex_contour(nx, ny, x, y, f, x0, y0, xp, yp, ns, ttot, xs, ys, ier)
 end subroutine i2mex_contour
 
 
-subroutine i2mex_xydot(neq, t, y, ydot)
+subroutine i2mex_xydot(t, y, ydot)
 
   use cont_mod
 
   implicit none
   integer, parameter :: r8 = selected_real_kind(12,100)
-  integer neq, iok
-  real(r8) t, y(neq), ydot(neq)
+  integer iok
+  real(r8) t, y(2), ydot(2)
   real(r8) df(2)
 
   call ezspline_gradient(fspl, y(1), y(2), df, iok)
@@ -247,10 +242,5 @@ subroutine i2mex_xydot(neq, t, y, ydot)
 
   ydot(1) = -cont_sign * y(1)*df(2)
   ydot(2) = +cont_sign * y(1)*df(1)
-!!$  ydot(1) = - y(1)*df(2)
-!!$  ydot(2) = + y(1)*df(1)
 
 end subroutine i2mex_xydot
-
-subroutine i2mex_jac
-end subroutine i2mex_jac
