@@ -1,6 +1,6 @@
 subroutine i2mex_getP(ns, psi, p, ier)
 
-  ! Get the pressure p on the psi mesh (p in [mu0 * Pa]=[Tesla] units)
+  ! Get the pressure p on the psi mesh (p in [mu0 * Pa]=[Tesla^2] units)
 
   use i2mex_mod
   implicit none
