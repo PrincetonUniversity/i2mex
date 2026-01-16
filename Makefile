@@ -14,7 +14,12 @@ CCC =$(CC)
 #FFLAGS += -check underflow -check overflow -check bounds \
 #-warn argument_checking
 
-FFLAGS += -O
+ifeq ($(FC),ifort)
+  FFLAGS += -O2
+else
+  FFLAGS += -O2 -O2 -m64 -fallow-argument-mismatch -fno-range-check -fdollar-ok
+endif
+FFLAGS += -I$(EZCDF_HOME)/include -I./ -I$(PSPLINE_HOME)/include -I$(PLASMA_STATE_ROOT)/mod
 
 .PHONY: all clean
 
@@ -37,10 +42,10 @@ TRXPLIB=-ltrxplib -ltrread -ltr_getnl -lrp_kernel -lrplot_mod -lrplot_io \
  -L$(UFILES_ROOT)/lib -lureadsub -lufport -lmds_sub -lmdstransp \
  -ltokyr -lxdatmgr -linterp_sub
 
-LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib $(TRXPLIB) \
+LDLIBS2 = -L$(OBJ)/lib -L$(PLASMA_STATE_ROOT)/lib $(TRXPLIB) \
  -lold_xplasma -lxplasma_debug -lxplasma2 -llsode -llsode_linpack \
  -lgeqdsk_mds -lr8bloat \
- -lsmlib -lmdstransp -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lfluxav \
+ -lsmlib -lmdstransp -L$(MDSPLUS_DIR)/lib -lMdsLib -lnscrunch -lfluxav \
  -ltrgraf  -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
  -L${LAPACK_HOME}/lib -llapack -lblas \
@@ -48,10 +53,10 @@ LDLIBS2 = -L$(OBJ)/lib -L$(NTCC_HOME)/lib $(TRXPLIB) \
  -lsg -ljc -lportlib \
  -L$(EZCDF_HOME)/lib -lezcdf
 
-LDLIBS = -L$(OBJ)/lib -L$(NTCC_HOME)/lib $(TRXPLIB) \
+LDLIBS = -L$(OBJ)/lib -L$(PLASMA_STATE_ROOT)/lib $(TRXPLIB) \
  -lold_xplasma -lxplasma2 -llsode -llsode_linpack \
  -lgeqdsk_mds -lr8bloat -lmdstransp \
- -L$(MDSPLUS)/lib -lMdsLib -lnscrunch -lsmlib -lfluxav \
+ -L$(MDSPLUS_DIR)/lib -lMdsLib -lnscrunch -lsmlib -lfluxav \
  -L$(PSPLINE_HOME)/lib -lpspline \
  -L${NETCDF_FORTRAN_HOME}/lib -lnetcdf -lnetcdff \
  -L${LAPACK_HOME}/lib -llapack -lblas -lmclib \
@@ -76,10 +81,10 @@ chkdirs:
 
 # compile f90
 $(OBJDIR)/%.o: %.f90
-	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o $(OBJDIR)/$*.o $<
+	$(FC90) $(FFLAGS) $(MODFLAGS) -c -o $(OBJDIR)/$*.o $<
 
 util/%.o: util/%.f90
-	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ -I$(NTCC_HOME)/mod -I$(PSPLINE_HOME)/include -c -o util/$*.o $<
+	$(FC90) $(FFLAGS) $(MODFLAGS) -c -o util/$*.o $<
 
 %.o: %.c
 	$(CCC) $(CFLAGS) -c $<
