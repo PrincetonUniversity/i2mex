@@ -1,0 +1,81 @@
+C******************** START FILE SELCHK.FOR ; GROUP SELCON ******************
+C-------------------------------
+      LOGICAL FUNCTION SELCHK(ZABR)
+C
+      use cplotr_mod
+C
+      CHARACTER*(*) ZABR
+C
+      CHARACTER*32 ZSELEC
+C
+C----------------------------------------------------------------------
+C  CHECK IF ABBREVIATION QUALIFIES-- IF SO SET FUNCTION VALUE .TRUE.
+C
+      SELCHK=.TRUE.
+C
+      IF(SSELEC.EQ.'* ') RETURN
+C
+      ILENA=LEN(SSELEC)
+C
+C  GET LENGTHS OF PASSED FCN ABBREVIATION + SELECTION SUBSTRING
+C
+      DO 10 IC=1,ILENA
+        IF(ZABR(IC:IC).NE.' ') ILABR=IC
+        IF(SSELEC(IC:IC).NE.' ') ILSEL=IC
+ 10   CONTINUE
+C
+C  FIGURE OUT RANGE OF PTS AT WHICH TO START CHARACTER-BY-CHARACTER
+C  COMPARISONS
+C  CHECK FOR SYMBOLS "[" AND "]" IN SELECTION SUBSTRING
+C
+      ZSELEC=' '
+      IF(SSELEC(1:1).EQ.'[') THEN
+        ILSP=ILSEL
+        ILSEL=ILSEL-1
+        IF(ILSEL.LE.0) RETURN
+        IC1A=1
+        IC1B=1
+        ZSELEC(1:ILSEL)=SSELEC(2:ILSP)
+      ELSE IF(SSELEC(ILSEL:ILSEL).EQ.']') THEN
+        ILSEL=ILSEL-1
+        IC1A=ILABR-ILSEL+1
+        IC1B=IC1A
+        ZSELEC(1:ILSEL)=SSELEC(1:ILSEL)
+      ELSE
+        ZSELEC(1:ILSEL)=SSELEC(1:ILSEL)
+        IC1A=1
+        IC1B=ILABR-ILSEL+1
+      ENDIF
+C
+C  LOOK FOR MATCHES
+C  IF SUBSTRING IS LONGER THAN ABBREVIATION THEN NO MATCH IS
+C  POSSIBLE
+C
+      IF(ILSEL.GT.ILABR) GO TO 90
+C
+      DO 30 IC1=IC1A,IC1B
+C  OTHER END
+        IC2=IC1+ILSEL-1
+C  CHAR BY CHAR CHECK
+        DO 20 IC=IC1,IC2
+          ICS=IC-IC1+1
+          I1=MIN0(IC,ICS)
+          I2=MAX0(IC,ICS)
+          IF((I1.LT.1).OR.(I2.GT.ILENA)) THEN
+            write(lunzer(0),*) IC,ICS,ZABR,ZSELEC,SSELEC
+            call abortt
+          ENDIF
+          IF(ZABR(IC:IC).NE.ZSELEC(ICS:ICS)) GO TO 30
+ 20     CONTINUE
+C  MATCH FOUND
+        RETURN
+C  KEEP LOOKING
+ 30   CONTINUE
+C
+C  NOT FOUND
+ 90   CONTINUE
+      SELCHK=.FALSE.
+      RETURN
+C
+      END
+C******************** END FILE SELCHK.FOR ; GROUP SELCON ******************

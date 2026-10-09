@@ -1,0 +1,108 @@
+#GNU Makefile to build Library libphysconst.a 
+#
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+
+# define system dependent flags, etc.
+-include  ../share/Make.local
+include ../share/Make.flags
+
+
+ifdef DEBUG
+	F90FLAGS = $(DF90FLAGS)
+	FFLAGS = $(DFFLAGS)
+endif
+
+ARC = $(OBJ)/lib/libphysconst.a
+OBJDIR = $(OBJ)/obj/physconst
+
+
+#=============================================================
+# f90 modules
+Mnams = physconst_mod.mod 
+Mobjs = physconst_mod.o
+MODS  = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+ 
+# fortran archive members
+F  = $(subst .f,.o, $(wildcard *.f)) $(subst .F,.o, $(wildcard *.F))
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+FALL = $(F) $(F90)
+
+MEM = $(foreach file,$(FALL),$(ARC)($(file)))
+
+
+.PHONY: clean realclean checkdir all
+
+libs: FORCE $(ARC)
+
+all:  libs 
+	@echo done  
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/mod || mkdir -p $(OBJ)/mod
+	@test -d $(OBJ)/obj/physconst || mkdir -p $(OBJ)/obj/physconst
+
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+
+
+#  compile fixed length fortran 90 code
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile fortran 77 code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile free form fortran 90 code
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(OBJ)/lib/*physconst.a
+	@(cd $(MDIR); rm -f $(MODULES))
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libphysconst.a || echo ">>> can not find $(ARC)";fi
+	@test -d $(MODDIR) || mkdir -p $(MODDIR)
+	@(cd $(MDIR); umask 133; cp $(MODULES) $(MODDIR)/)
+
+uninstall:
+	rm -f $(LIBDIR)/libphysconst.a
+	@(cd $(MODDIR); rm -f $(MODULES))
+
+

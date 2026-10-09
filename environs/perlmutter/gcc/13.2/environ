@@ -1,0 +1,53 @@
+export PREFIX=${PLASMA_STATE_HOME}/gcc/`gcc -dumpversion`
+
+module purge
+module load PrgEnv-gnu/8.5.0
+module load gcc-native/13.2
+module load cray-libsci
+
+export SOFT_HOME=/global/cfs/projectdirs/m4497/software
+
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+export GCCVERSION=`gcc -dumpversion | cut -f1 -d.`
+
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+
+# OPENBLAS
+
+export L_BLAS="-L$CRAY_LIBSCI_PREFIX/lib -lsci_gnu"
+export L_LAPACK="-L$CRAY_LIBSCI_PREFIX/lib -lsci_gnu"
+
+# NETCDF
+export L_NETCDF=`pkg-config --libs netcdf`
+export L_NETCDF+=" `pkg-config --libs netcdf-fortran` "
+export NETCDF_FORTRAN_HOME=$NETCDF_FORTRAN_DIR
+export NETCDF_C_HOME=$NETCDF_C_DIR
+
+# PSPLINE
+export PSPLINE_HOME=$SOFT_HOME/pspline
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+
+# EZCDF
+export EZCDF_HOME=$SOFT_HOME/ezcdf
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+
+# UFILES
+export UFILES_HOME=$SOFT_HOME/ufiles
+export UFILES_ROOT=$UFILES_HOME
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+
+# MDSPLUS
+export MDSPLUS_DIR=$SOFT_HOME/mdsplus
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"

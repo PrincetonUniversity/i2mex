@@ -1,0 +1,5 @@
+Library for "splitting" TRANSP namelists into fortran-namelist-
+readable pieces.  Uses file description-- not TRCOM-- is built
+without TRCOM and can be exported as a client component.
+Formerly this was the tr_vax library-- dmc Dec 2002.
+

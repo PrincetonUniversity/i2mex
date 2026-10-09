@@ -1,0 +1,9 @@
+$(OBJDIR)/ufopen.o : ufopen.for 
+$(OBJDIR)/ilnurd.o : ilnurd.for 
+$(OBJDIR)/vmsieee.o : vmsieee.for 
+$(OBJDIR)/str_cbc.o : str_cbc.for 
+$(OBJDIR)/lslcps2s.o : lslcps2s.for 
+$(OBJDIR)/ubi3ncod.o : ubi3ncod.for 
+$(OBJDIR)/lslcps2.o : lslcps2.for 
+$(OBJDIR)/ubi3dcod.o : ubi3dcod.for 
+$(OBJDIR)/ubufio.o : ubufio.for 

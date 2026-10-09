@@ -1,0 +1,10 @@
+#  fgtok table for tand, etc.
+#  ...single precision
+#
+sind		sindr
+cosd		cosdr
+tand		tandr
+
+asind		asindr
+acosd		acosdr
+atand		atandr

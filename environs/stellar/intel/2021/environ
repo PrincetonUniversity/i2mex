@@ -1,0 +1,45 @@
+module purge
+
+module load intel/2021.1.2
+export F90HOME=/opt/intel/oneapi/compiler/2021.1.2/linux/compiler
+export FLIBROOT=/opt/intel/oneapi/compiler/2021.1.2/linux/compiler/lib/intel64
+
+export FC=ifort
+export CC=icc
+export CXX=icpc
+
+#module load intel-mkl/11.3.4/4/64
+export BLASHOME=$MKLROOT/lib/intel64
+export LAPACKHOME=$BLASHOME
+export L_BLAS=" -L$BLASHOME -lmkl_blas95_lp64"
+export L_LAPACK=" -L$LAPACKHOME -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential"
+
+# NetCDF
+module load netcdf/intel-2021.1/hdf5-1.10.6/4.7.4
+export NETCDF_FORTRAN_HOME=$NETCDFDIR
+export NETCDF_C_HOME=$NETCDFDIR
+export L_NETCDF=" -L$NETCDFDIR/lib64 -lnetcdf -lnetcdff"
+
+# PSPLINE
+export PSPLINE_HOME=/projects/TRANSP/opt/pspline/2.0.1/intel/2021
+export LD_LIBRARY_PATH=$PSPLINE_HOME/lib:$LD_LIBRARY_PATH
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+# EZCDF
+export EZCDF_HOME=/projects/TRANSP/opt/ezcdf/0.0.3/intel/2021
+export LD_LIBRARY_PATH=$EZCDF_HOME/lib:$LD_LIBRARY_PATH
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+# UFILES
+export UFILES_ROOT=/projects/TRANSP/opt/ufiles/0.3.1/intel/2021
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+export FTN_MAIN=$FLIBROOT/for_main.o
+export FTN_TRAILER="-L$FLIBROOT -lifport -lintlc -limf -lifcore -ldl -lm -lirc -lsvml"
+export CPP_TRAILER=" -L/usr/lib64 -lstdc++"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"

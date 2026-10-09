@@ -1,0 +1,7 @@
+module () {
+       eval `/usr/bin/modulecmd bash $*`
+}
+
+module purge
+
+

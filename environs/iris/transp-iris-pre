@@ -1,0 +1,16 @@
+# This collection of module actions belongs to the PPPL site,
+#   ie, general to all compilers at PPPL.
+
+module purge
+
+module load git
+module load mdsplus/6.1.84
+module load python/3
+module unload gcc-4.9.2 default-paths/2017.06 mpich/3.2-gcc4.9.2 fftw/3.3.6-mpich3.2-gcc4.9.2 hdf5/1.8.19-mpich3.2-gcc4.9.2 netcdf/4.4.1-mpich3.2-gcc4.9.2
+
+#export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el6_10.x86_64
+#export PATH=$JAVA_HOME/bin:$PATH
+#export INCLUDE_PATH=$JAVA_HOME/include:$INCLUDE_PATH
+#export INCLUDE_PATH=$JAVA_HOME/include/linux:$INCLUDE_PATH
+#export LD_LIBRARY_PATH=$JAVA_HOME/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=$JAVA_HOME/lib/amd64:$LD_LIBRARY_PATH

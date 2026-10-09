@@ -1,0 +1,14 @@
+#
+# +name      => creates a new library definition with no path info
+# +name dir  => creates a new library definition with the library path directory
+# -name      => this library is a dependent of the currently defined library
+# @PHONY     => the currently defined library is tagged as being PHONY, the 
+#               library does not exist but the name is used to group the dependent
+#               libraries
+# @LITERAL string => this string will be used to define the library during linking
+#                    rather then using the automatic default
+
++vaxonly
+  -FORTRAN
+  -portlib
+  -NETCDF

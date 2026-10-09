@@ -1,0 +1,7 @@
+# public module -- used by trcom -- trdatbuf
+
+trdatbuf_module.f90
+trdatbuf_obj.f90
+trdatbuf_aux.f90
+trdatbuf_iface.f90
+trdatbuf_intmod.f90

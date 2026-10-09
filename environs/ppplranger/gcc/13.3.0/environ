@@ -1,0 +1,513 @@
+#!/bin/bash
+#
+# ============================================================================
+# Standalone I2MEX build environment
+#
+# PPPL Ranger
+# GCC 13.3.0
+# OpenMPI from Ranger RPM installation
+#
+# This environment is for the standalone I2MEX source tree.
+#
+# It provides:
+#
+#       I2MEX_HOME
+#       LOCAL
+#       COMPILER_FLAGS
+#
+# together with all external package locations and link groups required by
+# the standalone I2MEX build and the copied TRANSP-derived libraries.
+#
+# Usage:
+#
+#       scl enable gcc-toolset-13 bash
+#
+#       cd /u/mgorelen/i2mex_standalone
+#       source environ
+#       make
+#
+# ============================================================================
+
+
+# ============================================================================
+# Standalone I2MEX source/build tree
+#
+# ============================================================================
+# Compiler configuration Makefile
+#
+# Compiler-specific options are kept outside the top-level Makefile.
+#
+# Expected location:
+#
+#       environs/ranger/gcc/13.3.0/makefile.mk
+# ============================================================================
+# GCC Toolset 13.3
+#
+# This environment should normally be sourced after:
+#
+#       scl enable gcc-toolset-13 bash
+# ============================================================================
+
+export GCC_ROOT="/opt/rh/gcc-toolset-13/root/usr"
+
+export PATH="${GCC_ROOT}/bin:${PATH}"
+
+hash -r
+
+export GCC_RUNTIME_ROOT="${GCC_ROOT}"
+
+#
+# Directory containing the GCC Fortran runtime.
+#
+
+export FLIBROOT="$(
+    dirname "$(gfortran -print-file-name=libgfortran.so)"
+)"
+
+
+# ============================================================================
+# Compilers
+# ============================================================================
+
+export FC=gfortran
+export F90=gfortran
+export CC=gcc
+export CXX=g++
+
+#
+# Compatibility variable retained for copied TRANSP-derived Makefiles.
+#
+
+export GCC10=1
+
+
+# ============================================================================
+# OpenMPI from Ranger RPM installation
+# ============================================================================
+
+export OPENMPI_HOME="/usr/lib64/openmpi"
+
+export PATH="${OPENMPI_HOME}/bin:${PATH}"
+
+export MPIF90="${OPENMPI_HOME}/bin/mpif90"
+export MPIFC="${OPENMPI_HOME}/bin/mpifort"
+export MPICC="${OPENMPI_HOME}/bin/mpicc"
+export MPICXX="${OPENMPI_HOME}/bin/mpicxx"
+
+#
+# Compatibility variables used by TRANSP-derived Makefiles.
+#
+
+export FORTRAN_COMMAND="${MPIF90}"
+export CC_COMMAND="${MPICC}"
+export CX_COMMAND="${MPICXX}"
+
+export F90HOME="${OPENMPI_HOME}"
+
+export MPI_CMD="${OPENMPI_HOME}/bin/mpiexec --bind-to none"
+
+
+# ============================================================================
+# HDF5 / NetCDF from Ranger RPM installation
+# ============================================================================
+
+export HDF5_HOME="/usr"
+
+export NETCDF_C_HOME="/usr"
+export NETCDF_F_HOME="/usr"
+export NETCDF_FORTRAN_HOME="/usr"
+
+#
+# Ranger RPM location containing the NetCDF Fortran module files.
+#
+
+export NETCDF_MODDIR="/usr/lib64/gfortran/modules"
+
+
+# ============================================================================
+# NetCDF / HDF5 libraries
+# ============================================================================
+
+export L_NETCDF="\
+-L${NETCDF_F_HOME}/lib64 \
+-lnetcdff \
+-L${NETCDF_C_HOME}/lib64 \
+-lnetcdf \
+-Wl,-rpath,${HDF5_HOME}/lib64 \
+-L${HDF5_HOME}/lib64 \
+-lhdf5_fortran \
+-lhdf5hl_fortran \
+-lhdf5_hl \
+-lhdf5"
+
+
+# ============================================================================
+# BLAS / LAPACK
+#
+# Ranger uses the system OpenBLAS shared library.
+#
+# This is the same workaround used by the Ranger Plasma State environment.
+# ============================================================================
+
+export NETLIB_LAPACK_HOME="/usr"
+
+export L_LAPACK=""
+
+export L_BLAS="/usr/lib64/libopenblas.so.0"
+
+export LMPI_SCALAPACK="${L_LAPACK}"
+
+
+# ============================================================================
+# PSPLINE
+#
+# Ranger GCC 13.3.0 installation
+# ============================================================================
+
+export PSPLINE_HOME="\
+/u/mgorelen/transp_external/opt/pspline/2.0.1/gcc/13.3.0"
+
+export L_PSPLINE="\
+-L${PSPLINE_HOME}/lib \
+-lpspline"
+
+
+# ============================================================================
+# EZCDF
+#
+# Ranger GCC 13.3.0 installation
+# ============================================================================
+
+export EZCDF_HOME="\
+/u/mgorelen/transp_external/opt/ezcdf/0.0.3/gcc/13.3.0"
+
+export L_EZCDF="\
+-L${EZCDF_HOME}/lib \
+-lezcdf"
+
+
+# ============================================================================
+# UFILES
+#
+# Ranger GCC 13.3.0 installation
+# ============================================================================
+
+export UFILES_ROOT="\
+/u/mgorelen/transp_external/opt/ufiles/0.5.0/gcc/13.3.0"
+
+
+export L_UFILES="\
+-L${UFILES_ROOT}/lib \
+-luflib_userio \
+-luflib \
+-lr4smlib_userio \
+-lr4smlib \
+-lmds_sub \
+-lufhdf \
+-lmdstransp \
+-linterp_sub \
+-lextrac_sub \
+-ltrgraf \
+-lureadsub \
+-ltokid \
+-lufencod \
+-lufport"
+
+
+# ============================================================================
+# Additional UFILES library groups
+#
+# These are retained because some copied TRANSP-derived Makefiles use them
+# directly.
+# ============================================================================
+
+export L_MDSDUMMY="\
+-L${UFILES_ROOT}/lib \
+-lmds_dummy \
+-lmdstransp \
+-lureadsub \
+-lufencod \
+-lufport"
+
+
+export L_SGLIB="\
+-L${UFILES_ROOT}/lib \
+-lsg \
+-ljc \
+-lufport"
+
+
+export L_SGDUMMY="\
+-L${UFILES_ROOT}/lib \
+-lsgdummy"
+
+
+# ============================================================================
+# MDSplus
+# ============================================================================
+
+export MDSPLUS_HOME="/usr/local/mdsplus"
+
+export MDSPLUS_ROOT="${MDSPLUS_HOME}"
+export MDSPLUS="${MDSPLUS_HOME}"
+
+#
+# Preserve the Ranger MDSplus layout used by the existing Plasma State
+# environment.
+#
+
+export MDSPLUS_DIR="${MDSPLUS_HOME}_git"
+
+export MDSPLUS_INC="${MDSPLUS_DIR}/include"
+
+
+export L_MDSPLUS="\
+-Wl,-rpath,${MDSPLUS_HOME}/lib64 \
+-Wl,-rpath-link,${MDSPLUS_HOME}/lib64 \
+-L${MDSPLUS_HOME}/lib64 \
+-lMdsLib"
+
+
+# ============================================================================
+# Plasma State
+#
+# Ranger GCC 13.3.0 installation
+#
+# This path must correspond to the installed Ranger Plasma State build.
+# ============================================================================
+
+export PLASMA_STATE_ROOT="\
+/u/mgorelen/transp_external/opt/plasma_state/3.4.0/gcc/13.3.0"
+
+
+export L_PLASMA_STATE="\
+-L${PLASMA_STATE_ROOT}/lib \
+-lcstate_lib \
+-lplasma_state \
+-lps_xplasma2 \
+-lplasma_state_kernel \
+-lold_xplasma \
+-lgeqdsk_mds \
+-lxplasma_debug \
+-lxplasma2 \
+-lnscrunch \
+-lps_bloat \
+-lps_smlib \
+-lps_comput \
+-lps_portlib"
+
+
+# ============================================================================
+# Compiler/runtime compatibility variables
+#
+# These names are retained because some copied TRANSP-derived Makefiles may
+# refer to them directly.
+# ============================================================================
+
+export FTN_MAIN=""
+
+
+export FTN_TRAILER="\
+-Wl,-rpath,${FLIBROOT} \
+-L${FLIBROOT} \
+-lgfortran \
+-lm"
+
+
+export CPP_TRAILER="\
+-Wl,-rpath,${FLIBROOT} \
+-L${FLIBROOT} \
+-lstdc++ \
+-lgcc_s \
+-lgcc"
+
+
+# ============================================================================
+# Readline / terminal libraries
+# ============================================================================
+
+export LOADER_TRAILER="\
+-L/usr/lib64 \
+-lreadline \
+-lhistory \
+-ltermcap \
+-ldl"
+
+
+# ============================================================================
+# Runtime shared-library search path
+#
+# Search order:
+#
+#       1. standalone I2MEX libraries
+#       2. GCC Toolset runtime
+#       3. OpenMPI
+#       4. Plasma State
+#       5. UFILES
+#       6. PSPLINE
+#       7. EZCDF
+#       8. MDSplus
+#       9. HDF5 / NetCDF
+#      10. system libraries
+#
+# GCC Toolset libraries intentionally precede /usr/lib64.
+# ============================================================================
+
+export LD_LIBRARY_PATH="\
+${LOCAL}/lib:\
+${GCC_ROOT}/lib64:\
+${GCC_ROOT}/lib:\
+${FLIBROOT}:\
+${OPENMPI_HOME}/lib:\
+${PLASMA_STATE_ROOT}/lib:\
+${UFILES_ROOT}/lib:\
+${PSPLINE_HOME}/lib:\
+${EZCDF_HOME}/lib:\
+${MDSPLUS_HOME}/lib64:\
+${MDSPLUS_HOME}/lib:\
+${HDF5_HOME}/lib64:\
+${NETCDF_C_HOME}/lib64:\
+${NETCDF_F_HOME}/lib64:\
+${LD_LIBRARY_PATH:-}:\
+/usr/lib64"
+
+
+# ============================================================================
+# Link-time library search path
+#
+# GCC Toolset libraries intentionally precede /usr/lib64.
+# ============================================================================
+
+export LIBRARY_PATH="\
+${LOCAL}/lib:\
+${GCC_ROOT}/lib64:\
+${GCC_ROOT}/lib:\
+${FLIBROOT}:\
+${OPENMPI_HOME}/lib:\
+${PLASMA_STATE_ROOT}/lib:\
+${UFILES_ROOT}/lib:\
+${PSPLINE_HOME}/lib:\
+${EZCDF_HOME}/lib:\
+${MDSPLUS_HOME}/lib64:\
+${MDSPLUS_HOME}/lib:\
+${HDF5_HOME}/lib64:\
+${NETCDF_C_HOME}/lib64:\
+${NETCDF_F_HOME}/lib64:\
+${LIBRARY_PATH:-}:\
+/usr/lib64"
+
+
+# ============================================================================
+# Header / Fortran module search paths
+# ============================================================================
+
+export CPATH="\
+${MDSPLUS_INC}:\
+${NETCDF_MODDIR}:\
+/usr/include/openmpi-x86_64:\
+/usr/include:\
+${CPATH:-}"
+
+
+export C_INCLUDE_PATH="\
+${MDSPLUS_INC}:\
+${C_INCLUDE_PATH:-}"
+
+
+# ============================================================================
+# TRANSP / MDSplus servers
+#
+# These variables are not required for compilation of libi2mex itself.
+# They are retained for I2MEX utilities that access TRANSP/MDSplus data.
+# ============================================================================
+
+export TRANSPGRID_SERVER="transpgrid.pppl.gov"
+export MDS_TRANSP_SERVER="transpgrid.pppl.gov"
+export MDS_TRANSP_RETRY=3
+
+
+# ============================================================================
+# Build options
+# ============================================================================
+
+export MAKE_SO=1
+export DEBUG=0
+
+
+# ============================================================================
+# Create standalone build directories
+# ============================================================================
+
+mkdir -p "${LOCAL}/lib"
+mkdir -p "${LOCAL}/mod"
+mkdir -p "${LOCAL}/obj"
+mkdir -p "${LOCAL}/bin"
+mkdir -p "${LOCAL}/exe"
+mkdir -p "${LOCAL}/tmp"
+mkdir -p "${LOCAL}/work"
+
+
+# ============================================================================
+# Environment summary
+# ============================================================================
+
+echo
+echo "======================================================================"
+echo " Standalone I2MEX environment -- Ranger"
+echo "======================================================================"
+echo
+
+echo "I2MEX_HOME:"
+echo "  ${I2MEX_HOME}"
+echo
+
+echo "LOCAL:"
+echo "  ${LOCAL}"
+echo
+
+echo "COMPILER_FLAGS:"
+echo "  ${COMPILER_FLAGS}"
+echo
+
+echo "Compilers:"
+echo "  FC       = ${FC}"
+echo "  CC       = ${CC}"
+echo "  CXX      = ${CXX}"
+echo "  MPIF90   = ${MPIF90}"
+echo "  MPICC    = ${MPICC}"
+echo "  MPICXX   = ${MPICXX}"
+echo
+
+echo "Compiler versions:"
+echo "  $(gfortran --version | head -1)"
+echo "  $(gcc --version | head -1)"
+echo
+
+echo "GCC runtime:"
+echo "  GCC_ROOT = ${GCC_ROOT}"
+echo "  FLIBROOT = ${FLIBROOT}"
+echo
+
+echo "MPI:"
+echo "  OPENMPI_HOME = ${OPENMPI_HOME}"
+echo "  MPI_CMD      = ${MPI_CMD}"
+echo
+
+echo "External packages:"
+echo "  UFILES_ROOT       = ${UFILES_ROOT}"
+echo "  PLASMA_STATE_ROOT = ${PLASMA_STATE_ROOT}"
+echo "  PSPLINE_HOME      = ${PSPLINE_HOME}"
+echo "  EZCDF_HOME        = ${EZCDF_HOME}"
+echo "  MDSPLUS_HOME      = ${MDSPLUS_HOME}"
+echo "  MDSPLUS_DIR       = ${MDSPLUS_DIR}"
+echo "  NETCDF_F_HOME     = ${NETCDF_F_HOME}"
+echo "  NETCDF_C_HOME     = ${NETCDF_C_HOME}"
+echo "  NETCDF_MODDIR     = ${NETCDF_MODDIR}"
+echo
+
+echo "Build options:"
+echo "  MAKE_SO = ${MAKE_SO}"
+echo "  DEBUG   = ${DEBUG}"
+echo
+
+echo "======================================================================"

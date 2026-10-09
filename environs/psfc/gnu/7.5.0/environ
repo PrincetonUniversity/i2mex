@@ -1,0 +1,123 @@
+export BUILD=${TRANSPHOME}/builds/${git_branch}
+export LOCAL=${BUILD}/gcc/7.5.0
+
+export FLIBROOT=/usr/lib/gcc/x86_64-linux-gnu/7.5.0
+
+export INCLUDE_PATH=/usr/include/openmpi:$INCLUDE_PATH
+
+export MPI_CMD=$(which mpiexec)
+export MPI_CMD="${MPI_CMD} --bind-to none"
+
+export FORTRAN_COMMAND=mpif90
+export CC_COMMAND=mpicc
+export CX_COMMAND=mpicxx
+
+export NETCDF_HOME=/usr
+export NETCDF_ROOT=$NETCDF_HOME
+export NETCDF_C_HOME=$NETCDF_HOME
+export NETCDF_FORTRAN_HOME=$NETCDF_HOME
+export NETCDF_PLN=TRUE
+
+export SUPERLU_HOME=/home/sachdev/other/superlu-5.2.2/builds/gcc/7.5.0
+export SUPERLU_ROOT=$SUPERLU_HOME
+export LD_LIBRARY_PATH=$SUPERLU_HOME/lib:$LD_LIBRARY_PATH
+export INCLUDE_PATH=$SUPERLU_HOME/include:$INCLUDE_PATH
+
+export SCALAPACKHOME=/home/sachdev/other/scalapack-2.0.2
+export INCLUDE_PATH=$SCALAPACKHOME/include:$INCLUDE_PATH
+
+export FFTW_HOME=/home/sachdev/other/fftw-3.3.8
+export FFTW_ROOT=$FFTW_HOME
+export LD_LIBRARY_PATH=$FFTW_HOME/lib:$LD_LIBRARY_PATH
+export INCLUDE_PATH=$FFTW_HOME/include:$INCLUDE_PATH
+
+export FANN_ROOT=/home/sachdev/other/fann-2.2.0
+export LD_LIBRARY_PATH=$FANN_ROOT/lib:$LD_LIBRARY_PATH
+
+export PSPLINE_HOME=/home/sachdev/other/pspline-2.0.0
+export LD_LIBRARY_PATH=$PSPLINE_HOME/lib:$LD_LIBRARY_PATH
+export INCLUDE_PATH=$PSPLINE_HOME/include:$INCLUDE_PATH
+
+export TGLF_ROOT=/home/sachdev/other/gacode/gacode/builds/c310244b/gcc/7.5.0
+export LD_LIBRARY_PATH=$TGLF_ROOT/lib:$LD_LIBRARY_PATH
+
+export GLF23_ROOT=/home/sachdev/other/gacode/gacode/builds/c310244b/gcc/7.5.0
+export LD_LIBRARY_PATH=$GLF23_ROOT/lib:$LD_LIBRARY_PATH
+
+export MMM_ROOT=/home/sachdev/other/mmm-9.0.10/builds/gcc/7.5.0
+export LD_LIBRARY_PATH=$MMM_ROOT/lib:$LD_LIBRARY_PATH
+
+export NEO_ROOT=/home/sachdev/other/gacode/transp_compatability/builds/527cd18f/gcc/7.5.0
+export LD_LIBRARY_PATH=$NEO_ROOT/lib:$LD_LIBRARY_PATH
+
+export CQL3D_ROOT=/home/sachdev/other/cql3d_f90/builds/1.2.0/gcc/7.5.0
+export LD_LIBRARY_PATH=$CQL3D_ROOT/lib:$LD_LIBRARY_PATH
+
+export GENRAY_ROOT=/home/sachdev/other/genray/builds/f0157afe/gcc/7.5.0
+export LD_LIBRARY_PATH=$GENRAY_ROOT/lib:$LD_LIBRARY_PATH
+
+export TORAY_GA_ROOT=/home/sachdev/other/toray/builds/531ffd74/gcc/7.5.0
+export LD_LIBRARY_PATH=$TORAY_GA_ROOT/lib:$LD_LIBRARY_PATH
+
+export TORBEAM_ROOT=/home/sachdev/other/torbeam/builds/44b41393/gcc/7.5.0
+export LD_LIBRARY_PATH=$TORBEAM_ROOT/lib:$LD_LIBRARY_PATH
+
+export LSCSQ_ROOT=/home/sachdev/other/lscsq/builds/04f241e2/gcc/7.5.0
+export LD_LIBRARY_PATH=$LSCSQ_ROOT/lib:$LD_LIBRARY_PATH
+
+export UFILES_ROOT=/home/sachdev/other/ufiles/builds/0.2.7/gcc/7.5.0
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+
+# Delayed Eval, don't eval these until runtime
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+export L_NETCDF=" -L$NETCDF_FORTRAN_HOME/lib -lnetcdff -L$NETCDF_C_HOME/lib -lnetcdf"
+export L_BLAS=" -L/usr/lib/x86_64-linux-gnu -lopenblas"
+export L_LAPACK=" -L/usr/lib/x86_64-linux-gnu -lopenblas"
+export L_SUPERLU=" -L$SUPERLU_ROOT/lib -lsuperlu $L_BLAS"
+export LMPI_BLACS=" -L$SCALAPACKHOME/lib -lscalapack"
+export LMPI_SCALAPACK=" -L$SCALAPACKHOME/lib -lscalapack"
+
+export L_NNLIB=" -L$FANN_ROOT/lib -lfann"
+export C_INCLUDE_PATH=$FANN_ROOT/include:$C_INCLUDE_PATH
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export L_TGLF=" -L$TGLF_ROOT/lib -ltglf"
+export LMPI_TGLF=" -L$TGLF_ROOT/lib -ltglf"
+
+export L_GLF23=" -L$GLF23_ROOT/lib -lglf23"
+export LMPI_GLF23=" -L$GLF23_ROOT/lib -lglf23"
+
+export L_MMM=" -L$MMM_ROOT/lib -lmmm"
+export LMPI_MMM=" -L$MMM_ROOT/lib -lmmm"
+
+export L_NEO=" -L$NEO_ROOT/lib -lneo -lgeo -lexpro -lmath -lumfpack -lbrainfuse"
+export LMPI_NEO=" -L$NEO_ROOT/lib -lneo -lgeo -lexpro_mpi -lmath -lumfpack -lbrainfuse"
+
+export L_CQL3D=" -L$CQL3D_ROOT/lib -lcql3d"
+export LMPI_CQL3D=" -L$CQL3D_ROOT/lib -lmpi_cql3d"
+
+export L_GENRAY=" -L$GENRAY_ROOT/lib -lgenray"
+export LMPI_GENRAY=" -L$GENRAY_ROOT/lib -lgenray"
+
+export L_TORAY_GA=" -L$TORAY_GA_ROOT/lib -ltoray_ga"
+export LMPI_TORAY_GA=" -L$TORAY_GA_ROOT/lib -ltoray_ga"
+
+export L_TORBEAM=" -L$TORBEAM_ROOT/lib -ltorbeam"
+export LMPI_TORBEAM=" -L$TORBEAM_ROOT/lib -ltorbeam"
+
+export L_LSCSQ=" -L$LSCSQ_ROOT/lib -llscsq -fopenmp"
+export LMPI_LSCSQ=" -L$LSCSQ_ROOT/lib -llscsq -fopenmp"
+
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod"
+
+export L_IMAS=" "
+export LMPI_IMAS=" "

@@ -1,0 +1,176 @@
+# This is an environment to be sourced in repository root.
+#
+# It is structured by site, then by compiler specific environments
+#
+
+export I2MEX_HOME=`pwd`
+
+#--- Site
+if [ -n "$SITE" ]; then
+    echo "Provided \$SITE=${SITE}"
+    SITE_ENV=${SITE}
+else
+    echo -n "\$SITE not provided. Attempting Site discovery using dnsdomainname and hostname. "
+    # try to query dnsdomainname and hostname without failing
+    command -v dnsdomainname >& /dev/null && DNSDOMAIN=$(dnsdomainname) || DNSDOMAIN="NA"
+    command -v hostname >& /dev/null && HOSTNAME=$(hostname -s) || HOSTNAME="NA"
+    if [ -z "$DNSDOMAIN" ]; then
+        DNSDOMAIN="NA"
+    fi
+    if [ $DNSDOMAIN = 'pppl.gov' ]; then
+        if [[ $HOSTNAME == "flux"* ]]; then
+            SITE_ENV='ppplflux'
+        elif [[ $HOSTNAME == "lynx"* ]]; then
+            SITE_ENV='pppllynx'
+        elif [[ $HOSTNAME == "ranger"* ]]; then
+            SITE_ENV='ppplranger'
+        else
+            SITE_ENV='pppl'
+	fi        
+        echo "Found SITE ${SITE_ENV}"
+    elif [ $HOSTNAME = 'stellar-intel' ]; then
+        SITE_ENV='stellar'
+        echo "Found SITE ${SITE_ENV}"
+    elif [ $DNSDOMAIN = 'ornl.gov' ]; then
+        SITE_ENV='ornl'
+        echo "Found SITE ${SITE_ENV}"
+    elif [[ $LMOD_SITE_NAME == "NERSC"* ]]; then
+        SITE_ENV='perlmutter'
+        echo "Found SITE ${SITE_ENV}"
+    elif [ $DNSDOMAIN = 'iter.org' ]; then
+        SITE_ENV='iter'
+        echo "Found SITE ${SITE_ENV}"
+    elif [ $DNSDOMAIN = 'nersc.gov' ]; then
+        SITE_ENV='nersc'
+        echo "Found SITE ${SITE_ENV}"
+    elif [[ $HOSTNAME == "iris"* ]]; then
+        SITE_ENV='iris'
+        echo "Found SITE ${SITE_ENV}"
+    elif [[ $HOSTNAME == "omega"* ]]; then
+        SITE_ENV='omega'
+        echo "Found SITE ${SITE_ENV}"
+    elif [[ $HOSTNAME == "mfews"* ]]; then
+        SITE_ENV='psfc'
+        echo "Found SITE ${SITE_ENV}"
+    else
+        echo "\$SITE not provided, defaulting SITE='generic'"
+        SITE_ENV='generic'
+    fi #DNS
+fi #SITE
+
+#--- Compiler
+if [ -n "$COMPILER" ]; then
+    echo "Provided \$COMPILER=${COMPILER}"
+else
+    # When compiler not provided, assume a default
+    if [ $SITE_ENV = 'pppl' ]; then
+        COMPILER='ICC'
+    elif [ $SITE_ENV = 'ppplflux' ]; then
+        COMPILER='GCC'
+    elif [ $SITE_ENV = 'pppllynx' ]; then
+        COMPILER='GCC'
+    elif [ $SITE_ENV = 'ppplranger' ]; then
+        COMPILER='GCC'
+    elif [ $SITE_ENV = 'stellar' ]; then
+        COMPILER='ICC'
+    elif [ $SITE_ENV = 'iris' ]; then
+        COMPILER='ICC'
+    elif [ $SITE_ENV = 'omega' ]; then
+        COMPILER='GCC'
+    elif [ $SITE_ENV = 'psfc' ]; then
+        COMPILER='GCC'
+    elif [ $SITE_ENV = 'perlmutter' ]; then
+        COMPILER='GCC'
+    else
+        COMPILER='GCC'
+    fi
+    echo "\$COMPILER not provided, assuming default ${COMPILER} for \$SITE=${SITE_ENV}"
+fi
+export COMPILER
+
+# Determine compiler family
+if [ $COMPILER = 'PGC' -o $COMPILER = 'PGI' -o $COMPILER = 'Portland' ]; then
+    COMPILER_ENV='pgi'
+elif [ $COMPILER = 'GCC' ]; then
+    COMPILER_ENV='gcc'
+elif [ $COMPILER = 'ICC' ]; then
+    COMPILER_ENV='intel'
+else
+    echo "ERROR: $COMPILER compiler not supported"
+    return 1
+fi
+
+# Determine compiler version
+if [ -n "$COMPILER_VER" ]; then
+    if [ -z "$COMPILER" ]; then
+        echo "ERROR: Providing COMPILER_VER only makes sense if you have provided a COMPILER"
+        return 1
+    fi
+    echo "Provided ${COMPILER_ENV} Version ${COMPILER_VER}"
+else
+    # Map "SITE_ENV,COMPILER_ENV" ~> DEFAULT_COMPILER_VER
+    ### This will not work in current osx (bashv3).
+    ###   We do not need it there so it will just complain about these lines.
+
+    # decalre an associative array
+    declare -A version_map
+    version_map["pppl,gcc"]='9.3.0'
+    version_map["pppl,pgi"]='19.10'
+    version_map["iter,gcc"]='10.2.0'
+    version_map["pppl,intel"]='2019'
+    version_map["ppplflux,intel"]='2023'
+    version_map["ppplflux,gcc"]='13.2.0'
+    version_map["pppllynx,gcc"]='13.4.0'
+    version_map["ppplranger,gcc"]='13.3.0'
+    version_map["stellar,intel"]='2021'
+    version_map["iris,intel"]='2018'
+    version_map["omega,gcc"]='8.3.1'
+    version_map["psfc,gcc"]='7.5.0'
+    version_map["generic,gcc"]='0.0.0'
+    version_map["perlmutter,gcc"]='13.2'
+    version_map["yournewsite,somecompiler"]='versionthatfixesallthebugsinyourcode'
+    # end array
+
+    # Lookup and export
+    KEY="${SITE_ENV},${COMPILER_ENV}"
+    COMPILER_VER=${version_map["$KEY"]}
+    if [ -z "$COMPILER_VER" ]; then
+        echo "ERROR: You are attempting to access default behavior but it is not defined for $KEY , try extending 'version_map'"
+        return 1
+    fi
+fi
+
+# These are to help the test harness extract the information
+#    to reconstruct the environment inside slurm jobs
+export _COMPILER="${COMPILER}"
+export _COMPILER_VER="${COMPILER_VER}"
+export SITE_ENV
+export COMPILER_FLAGS="${I2MEX_HOME}/environs/${SITE_ENV}/${COMPILER_ENV}/${COMPILER_VER}/makefile.mk"
+
+# Augment with compiler specific env
+ENV_FILE="${I2MEX_HOME}/environs/${SITE_ENV}/${COMPILER_ENV}/${COMPILER_VER}/environ"
+
+if [ -f "$ENV_FILE" ]; then
+    echo "Using ENV_FILE=${ENV_FILE}"
+else
+    echo "ERROR: ENV_FILE=${ENV_FILE} does not exist.  Please check your SITE, COMPILER_ENV, and COMPILER_VER." \
+         " If they are correct, you will need to add this environ file"
+    return 1
+fi
+source $ENV_FILE
+
+# Reset compiler version variable so that LOCAL is set correctly for generic GCC
+if [ $SITE_ENV = 'generic' ]; then
+    COMPILER_VER=`gcc -dumpversion`
+fi
+
+export LOCAL=${I2MEX_HOME}/builds/${COMPILER_ENV}/${COMPILER_VER}
+mkdir -p $LOCAL/{bin,include,lib,mod,obj}
+export PATH=${LOCAL}/bin:${PATH}
+echo "Using LOCAL=${LOCAL}"
+
+# for idempotence, unset the following:
+unset SITE
+unset COMPILER
+unset COMPILER_ENV
+unset COMPILER_VER

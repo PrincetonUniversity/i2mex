@@ -1,0 +1,344 @@
+#!/bin/bash
+#
+# ============================================================================
+# Standalone I2MEX build environment
+#
+# PPPL Flux
+# GCC 13.2.0
+# OpenMPI 4.1.6
+#
+# This environment uses the same compiler/module ecosystem as TRANSP on Flux,
+# but the I2MEX build itself is independent of TRANSP.
+#
+# Usage:
+#
+#     source environ
+#
+#     make -f Makefile_flux
+#
+# ============================================================================
+
+
+# ============================================================================
+# Clean module environment
+# ============================================================================
+
+module purge
+
+export PATH="/usr/bin:/bin:${PATH}"
+hash -r
+
+
+# ============================================================================
+# Standalone I2MEX root
+#
+# Determine the source-tree location from this environ file itself.
+#
+# I2MEX_HOME = source tree
+# LOCAL      = standalone build/install tree
+# ============================================================================
+# ============================================================================
+# GCC 13.2.0
+# ============================================================================
+
+module load gcc/13.2.0-gcc-11.4.1-wykjv
+
+export FC=gfortran
+export F90=gfortran
+export CC=gcc
+export CXX=g++
+
+#
+# Directory containing the GCC Fortran runtime.
+#
+# Using gfortran itself is safer than extracting the first component of
+# LD_LIBRARY_PATH.
+#
+
+export FLIBROOT="$(
+    dirname "$(gfortran -print-file-name=libgfortran.so)"
+)"
+
+
+# ============================================================================
+# OpenMPI 4.1.6
+# ============================================================================
+
+module load openmpi/4.1.6-gcc-13.2.0
+
+export MPIF90=mpif90
+export MPICC=mpicc
+export MPICXX=mpicxx
+
+#
+# Compatibility variables used by TRANSP-derived Makefiles.
+#
+
+export FORTRAN_COMMAND="${MPIF90}"
+export CC_COMMAND="${MPICC}"
+export CX_COMMAND="${MPICXX}"
+
+export GCC10=1
+
+
+# ============================================================================
+# HDF5
+# ============================================================================
+
+module load hdf5/1.14.3-gcc-13.2.0-gmomj
+
+
+# ============================================================================
+# NetCDF
+# ============================================================================
+
+module load openmpi-4.1.6/gcc-13.2.0/netcdf-c/main-4adke
+module load openmpi-4.1.6/gcc-13.2.0/netcdf-cxx4/4.3.1-k3f2t
+module load openmpi-4.1.6/gcc-13.2.0/netcdf-fortran/4.6.1-53pdx
+
+module load libszip/2.1.1-gcc-13.2.0-wwyvk
+
+export L_NETCDF="\
+-L${NETCDF_F_HOME}/lib -lnetcdff \
+-L${NETCDF_C_HOME}/lib64 -lnetcdf"
+
+
+# ============================================================================
+# BLAS / LAPACK
+#
+# Use the same OpenBLAS installation for both BLAS and LAPACK interfaces.
+# ============================================================================
+
+module load openblas/0.3.27-gcc-13.2.0-nf4tj
+
+export OPENBLAS_ROOT="/opt/pppl/software/spack/linux-rocky9-zen4/gcc-13.2.0/openblas-0.3.27-nf4tjwxwpmhxpclpiw4yx7wmfr7bn45d"
+
+export L_BLAS="\
+-L${OPENBLAS_ROOT}/lib \
+-lopenblas"
+
+export L_LAPACK="\
+-L${OPENBLAS_ROOT}/lib \
+-lopenblas"
+
+
+# ============================================================================
+# MDSplus
+# ============================================================================
+
+module load mdsplus/7.132.0-gcc-13.2.0
+
+export L_MDSPLUS="\
+-L${MDSPLUS_DIR}/lib \
+-lMdsLib"
+
+
+# ============================================================================
+# EZCDF
+# ============================================================================
+
+export EZCDF_HOME="/p/pshare/transp/opt/ezcdf/0.4.0/gcc/13.2.0"
+
+export L_EZCDF="\
+-L${EZCDF_HOME}/lib \
+-lezcdf"
+
+
+# ============================================================================
+# PSPLINE
+# ============================================================================
+
+export PSPLINE_HOME="/p/pshare/transp/opt/pspline/2.2.0/gcc/13.2.0"
+
+export L_PSPLINE="\
+-L${PSPLINE_HOME}/lib \
+-lpspline"
+
+
+# ============================================================================
+# UFILES
+# ============================================================================
+
+export UFILES_ROOT="/p/pshare/transp/opt/ufiles/0.10.0/gcc/13.2.0"
+
+export L_UFILES="\
+-L${UFILES_ROOT}/lib \
+-luflib_userio \
+-luflib \
+-lr4smlib_userio \
+-lr4smlib \
+-lmds_sub \
+-lufhdf \
+-lmdstransp \
+-linterp_sub \
+-lextrac_sub \
+-ltrgraf \
+-lureadsub \
+-ltokid \
+-lufencod \
+-lufport"
+
+
+# ---------------------------------------------------------------------------
+# Additional UFILES library groups used by some TRANSP-derived Makefiles
+# ---------------------------------------------------------------------------
+
+export L_MDSDUMMY="\
+-L${UFILES_ROOT}/lib \
+-lmds_dummy \
+-lmdstransp \
+-lureadsub \
+-lufencod \
+-lufport"
+
+export L_SGLIB="\
+-L${UFILES_ROOT}/lib \
+-lsg \
+-ljc \
+-lufport"
+
+export L_SGDUMMY="\
+-L${UFILES_ROOT}/lib \
+-lsgdummy"
+
+
+# ============================================================================
+# Plasma State
+# ============================================================================
+
+export PLASMA_STATE_ROOT="/p/pshare/transp/opt/plasma_state/3.6.0/gcc/13.2.0"
+
+export L_PLASMA_STATE="\
+-L${PLASMA_STATE_ROOT}/lib \
+-lcstate_lib \
+-lplasma_state \
+-lps_xplasma2 \
+-lplasma_state_kernel \
+-lold_xplasma \
+-lgeqdsk_mds \
+-lxplasma_debug \
+-lxplasma2 \
+-lnscrunch \
+-lps_bloat \
+-lps_smlib \
+-lps_comput \
+-lps_portlib"
+
+
+# ============================================================================
+# Compiler/runtime compatibility variables
+#
+# These names are retained because some copied TRANSP-derived Makefiles may
+# refer to them directly.
+# ============================================================================
+
+export FTN_MAIN=""
+
+export FTN_TRAILER="\
+-L${FLIBROOT} \
+-lgfortran \
+-lm"
+
+export CPP_TRAILER="\
+-L${FLIBROOT} \
+-lstdc++ \
+-lgcc_s \
+-lgcc"
+
+
+# ============================================================================
+# Readline / terminal libraries
+# ============================================================================
+
+export LOADER_TRAILER="\
+-lreadline \
+-lhistory \
+-ltinfo \
+-ldl"
+
+
+# ============================================================================
+# Shared-library runtime search path
+#
+# Put the standalone I2MEX libraries first.
+#
+# External library locations are then added explicitly so that programs and
+# build-time test executables can resolve the same libraries used at link
+# time.
+# ============================================================================
+
+export LD_LIBRARY_PATH="${LOCAL}/lib\
+:${PLASMA_STATE_ROOT}/lib\
+:${UFILES_ROOT}/lib\
+:${PSPLINE_HOME}/lib\
+:${EZCDF_HOME}/lib\
+:${MDSPLUS_DIR}/lib\
+:${NETCDF_F_HOME}/lib\
+:${NETCDF_C_HOME}/lib64\
+:${OPENBLAS_ROOT}/lib\
+:${FLIBROOT}\
+:${LD_LIBRARY_PATH:-}"
+
+
+# ============================================================================
+# Build options
+# ============================================================================
+
+export MAKE_SO=1
+export DEBUG=0
+
+
+# ============================================================================
+# Create standalone build directories
+# ============================================================================
+
+mkdir -p "${LOCAL}/lib"
+mkdir -p "${LOCAL}/mod"
+mkdir -p "${LOCAL}/obj"
+mkdir -p "${LOCAL}/bin"
+
+
+# ============================================================================
+# Summary
+# ============================================================================
+
+echo
+echo "======================================================================"
+echo " Standalone I2MEX environment"
+echo "======================================================================"
+echo
+echo "I2MEX_HOME:"
+echo "  ${I2MEX_HOME}"
+echo
+echo "LOCAL:"
+echo "  ${LOCAL}"
+echo
+echo "COMPILER_FLAGS:"
+echo "  ${COMPILER_FLAGS}"
+echo
+echo "Compilers:"
+echo "  FC       = ${FC}"
+echo "  CC       = ${CC}"
+echo "  CXX      = ${CXX}"
+echo "  MPIF90   = ${MPIF90}"
+echo
+echo "Compiler versions:"
+echo "  $(gfortran --version | head -1)"
+echo "  $(gcc --version | head -1)"
+echo
+echo "External packages:"
+echo "  UFILES_ROOT       = ${UFILES_ROOT}"
+echo "  PLASMA_STATE_ROOT = ${PLASMA_STATE_ROOT}"
+echo "  PSPLINE_HOME      = ${PSPLINE_HOME}"
+echo "  EZCDF_HOME        = ${EZCDF_HOME}"
+echo "  MDSPLUS_DIR       = ${MDSPLUS_DIR}"
+echo "  NETCDF_F_HOME     = ${NETCDF_F_HOME}"
+echo "  NETCDF_C_HOME     = ${NETCDF_C_HOME}"
+echo "  OPENBLAS_ROOT     = ${OPENBLAS_ROOT}"
+echo
+echo "Build options:"
+echo "  MAKE_SO = ${MAKE_SO}"
+echo "  DEBUG   = ${DEBUG}"
+echo
+echo "======================================================================"
+

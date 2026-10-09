@@ -1,0 +1,47 @@
+export BUILD=${TRANSPHOME}/builds/${git_branch}
+export LOCAL=${BUILD}/gcc/8.3.1
+
+module load env/gcc8.x
+export F90HOME=/fusion/usc/c8/opt/env/gcc-8.3.1
+export FLIBROOT=/fusion/usc/c8/opt/env/gcc-8.3.1/lib
+export FORTRAN_VARIANT=GCC
+
+export FORTRAN_COMMAND=gfortran
+export CC_COMMAND=gcc
+export CX_COMMAND=g++
+
+module load mdsplus
+
+export PSPLINE_ROOT=$PSPLINE_HOME
+export LD_LIBRARY_PATH=$PSPLINE_ROOT/lib:$LD_LIBRARY_PATH
+
+export UFILES_ROOT=$UFILES_HOME
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+
+# Delayed Eval, don't eval these until runtime
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -L/usr/lib64 -ldl"
+
+# OPENBLAS
+
+export L_BLAS=" -lopenblas"
+export L_LAPACK=" -lopenblas"
+
+# NETCDF
+export L_NETCDF=` nf-config --flibs`
+export NETCDF_FORTRAN_HOME=` nf-config --prefix`
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod"
+

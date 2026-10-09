@@ -1,0 +1,60 @@
+export PREFIX=${PLASMA_STATE_HOME}/gcc/`gcc -dumpversion`
+
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+export GCCVERSION=`gcc -dumpversion | cut -f1 -d.`
+
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+
+
+# OPENBLAS
+
+if [[ -z "${OPENBLAS_HOME}" ]]; then
+   export OPENBLAS_HOME="/usr/lib64"
+fi
+
+export L_BLAS=" -L${OPENBLAS_HOME} -lopenblas"
+export L_LAPACK=" -L${OPENBLAS_HOME} -lopenblas"
+
+
+# NETCDF
+export L_NETCDF=` nf-config --flibs`
+export NETCDF_FORTRAN_HOME=` nf-config --prefix`
+
+
+# PSPLINE
+if [[ -z "${PSPLINE_HOME}" ]]; then
+   echo "ERROR: PSPLINE_HOME not defined. Is it installed?"
+fi
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+
+# EZCDF
+if [[ -z "${EZCDF_HOME}" ]]; then
+   echo "ERROR: EZCDF_HOME not defined. Is it installed?"
+fi
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+
+# UFILES
+if [[ -z "${UFILES_ROOT}" ]]; then
+   echo "ERROR: UFILES_ROOT not defined. Is it installed?"
+fi
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+
+# MDSPLUS
+if [[ -z "${MDSPLUS_DIR}" ]]; then
+   echo "WARNING: MDSPLUS_DIR not defined, using dummy lib"
+   export L_MDSPLUS=$L_MDSDUMMY
+else
+   export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+fi

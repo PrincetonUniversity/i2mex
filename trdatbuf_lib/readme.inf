@@ -1,0 +1,244 @@
+README file for Trdatbuf_Lib Module
+
+Prepared by C.Ludescher-Furth -- ludescher@pppl.gov 10/21/05
+
+****************
+REVISION HISTORY
+****************
+      date         Description
+
+----------------------------------------------------------------
+
+
+
+Index:
+   1. CONTENTS
+   2. UNPACKING INSTRUCTIONS
+   3. DESTINATIONS
+   4. BUILDING INSTRUCTIONS
+   5. TESTING INSTRUCTIONS
+   6. DOCUMENTATION
+   7. FINAL INSTALLATION
+
+
+************
+1. CONTENTS:
+************
+This directory should contain the following files:
+
+README_Trdatbuf:  This file.  Brief descriptions of the other files, and
+                 instructions for compiling, testing and installing the
+                 trdatbuf_lib library libtrdatbuf_lib.a and its test driver
+                 trdatbuf_test. 
+
+Makefile:       NOTE, "GNU make" must be used
+                      (usually in /usr/gnu/bin or /usr/local/bin).
+                      You also need "gcc" for pre-processing
+                      (exept on CRAY).
+		Main Makefile to invoke Makefiles in all subdirectories.  
+
+   
+./include/fpreproc:
+   *.h files for source pre-processing.
+
+./trdatbuf_lib:
+   README       -- A copy of README_Trdatbuf from above.
+   Makefile     -- to build libtrdatbuf_lib and test programs
+   Sources to build the library libtrdatbuf_lib.a
+
+
+-- in subdirectory share:
+   Make.flags:        Include file for Makefile, to setup Flags, etc.
+   Make.local.sample: Include file for Makefile, to setup non-conventional,
+                      site specific locations.
+
+**************************
+2. UNPACKING INSTRUCTIONS:
+**************************
+for tarfiles:
+  > tar zxvf trdatbuf_lib.tar
+
+or, for zip archives:
+  > unzip trdatbuf_lib.zip
+
+
+****************
+3. DESTINATIONS:
+****************
+Or where do the files go?
+(this refers to building and testing; see FINAL INSTALLATION for end result) 
+
+
+When you extract the tar file you get sub directories:
+./trdatbuf_lib     --  sources and testprogram 
+./share            --  include file Make.flags 
+./comput           --  transformation/interpolation routines
+./portlib          --  portability routines
+./include/fpreproc --  *.h files for cpp
+./fpreproc         --  python scripts for pre-processing of fortran
+
+The makefile will create more sub directories,
+lib:           for the library, libtrdatbuf_lib.a
+mod:           for the f90 modules
+obj/<libname>: for compiled objects
+test:          for the test programs and the sample output files.
+
+By default these directories are created in  
+./<MACHINE>, which is determined by Make.flags.
+e.g.: if you are running Linux, and the tar file resides in $HOME/foo,
+      the directories would be in
+      $HOME/foo/LINUX/{lib,mod,obj,test}.
+
+You can overwrite the destination by defining OBJ, as an environment
+variable (e.g. export OBJ=/dir1/dir2), or with make (e.g. "gmake OBJ=.").
+If OBJ is defined, the destinations will be
+$OBJ/{lib,mod,obj,test}.
+If OBJ is defined as "." then, in the example above, the destination
+would be $HOME/foo/{lib,mod,obj,test}.
+
+The rationale behind <MACHINE> is to facilitate building for various platforms.
+
+Note: If you define OBJ as option to gmake, you have to consistently do so;
+      e.g: gmake clean OBJ=., gmake install OBJ=.
+      Alternatively you can modify share/Make.local.sample
+      and rename it to share/Make.local.
+
+ 
+*************************
+4. BUILDING INSTRUCTIONS:
+*************************
+
+Required Compilers:
+===================
+   Python, gcc     -- for pre-processing
+   Fortran 90
+   C
+
+Required Libraries:
+===================
+   netCDF
+         The library is assumed to be in /usr/local/{lib,include}
+         If your site has it somwhere else, define NETCDF_DIR
+         e.g. gmake NETCDF_DIR=/my/nonstandard
+         Alternatively you can modify share/Make.local.sample
+         and rename it to share/Make.local.
+
+> gmake            -- to compile library and link all test programs
+
+> gmake checklibs  -- tells you what the makefile will do
+                      (without any action);
+                      it says which libraries it will make and
+                      which ones it already found and where.
+                      It also tells you how to rebuild an existing library.
+ 
+> gmake clean      -- to remove objects
+> gmake realclean  -- to remove objects and library
+
+> gmake show_makeflags -- to see what flags, definitions Make will use
+
+
+COMPILING FLAGS:
+----------------
+
+Compiling on Linux:
+-------------------
+
+To select a different compiler define
+FORTRAN_VARIANT to "Portland"  "Intel" "GCC"
+
+e.g.:
+setenv FORTRAN_VARIANT Portland (csh)
+FORTRAN_VARIANT=Portland; export  FORTRAN_VARIANT (sh)
+
+Alternatively, FORTRAN_VARIANT can be passed directly to the gmake
+command, as in:
+gmake  FORTRAN_VARIANT=Portland
+
+
+************************
+5. TESTING INSTRUCTIONS:
+************************
+
+To verify functioning of the software:
+--------------------------------------
+
+> cd <MACHINE>/test        or   > cd $OBJ/test 
+> ./trdatbuf_test 112989Z11PH.CDF
+
+
+************************
+6. DOCUMENTATION:
+************************
+
+TRDATBUF_LIB Home Page:
+http://w3.pppl.gov/NTCC/TrDatbuf_Lib
+
+TrDatbuf_Lib HELP
+http://w3.pppl.gov/~pshare/help/trdatbuf_lib.htm
+
+NTCC Home Page:
+http://w3.pppl.gov/NTCC
+
+
+**********************
+8. FINAL INSTALLATION:
+**********************
+
+Choose or create the root directory in which you wish to install the software.
+A common location would be /usr/ntcc, but installation can occur in any
+directory where you have appropriate permissions.
+
+You define your choice of root directory via PREFIX.
+The default for PREFIX is /usr/ntcc.
+
+The assumptions are:
+
+libraries in:       $PREFIX/lib        = $LIBDIR
+f90 modules in:     $PREFIX/mod        = $MODDIR
+man pages in:       $PREFIX/man/man3   = $MANDIR/man3
+
+To install the software, return to the top directory (the directory,
+where you downloaded the tar files) and type
+
+>   gmake install PREFIX=/dir1/dir2/
+    to install into /dir1/dir2/...
+
+>   gmake install  
+    to install into /usr/ntcc/...
+    or, if PREFIX is defined in share/Make.local
+
+If you want things elsewhere, you can overwrite the default with
+> gmake install LIBDIR=/xxx MODDIR=yyy MANDIR=/zzz
+
+NOTE:
+-----
+The library is installed as libtrdatbuf_lib.a
+Users should link with
+
+-L<PREFIX>/lib -ltrdatbuf_lib -lpspline -lcomput 
+
+Make sure users know what <PREFIX> is.
+
+After you have installed the software, you can delete the entire tree
+with
+> cd ..
+> rm -r foo
+   assuming the previous example.
+
+----------------------------------------------------------------------------
+
+IF YOU HAVE ANY PROBLEMS, PLEASE CONTACT EITHER:
+
+
+        Doug McCune, Princeton University
+                dmccune@pppl.gov
+        or
+
+        Christiane Ludescher-Furth, Princeton University
+                cludescher@pppl.gov
+        or      
+                ntcc_webmaster@pppl.gov
+
+
+
+

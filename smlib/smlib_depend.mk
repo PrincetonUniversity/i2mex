@@ -1,0 +1,12 @@
+$(OBJDIR)/r8filtr6.o : r8filtr6.f90 
+$(OBJDIR)/r8_qksmooth.o : r8_qksmooth.f90 
+$(OBJDIR)/r8filfn6.o : r8filfn6.f90 
+$(OBJDIR)/r8wxfint.o : r8wxfint.f90 
+$(OBJDIR)/r8fileps.o : r8fileps.f90 
+$(OBJDIR)/r8ierfcn.o : r8ierfcn.f90 
+$(OBJDIR)/r8filter.o : r8filter.f90 
+$(OBJDIR)/r8filtr90.o : r8filtr90.f90 
+$(OBJDIR)/r8_pctran.o : r8_pctran.f90 
+$(OBJDIR)/r8ddrop.o : r8ddrop.f90 
+$(OBJDIR)/r8filers.o : r8filers.f90 
+$(OBJDIR)/r8wxcint.o : r8wxcint.f90 

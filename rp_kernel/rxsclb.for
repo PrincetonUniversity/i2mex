@@ -1,0 +1,47 @@
+C******************** START FILE EXSCLB.FOR ; GROUP EXSUBS ******************
+C--------------------------------------------------------------------
+C  RXSCLB  -- rplot version
+C
+C  SET UP ADDL SCALAR LABELS FOR OUTPUT FILE(S)
+C
+C  THE FIRST SCALAR IN THE ARRAY IS RESERVED FOR THE EXTRACTED SLICE
+C  FIXED PT. VALUE-- SO THAT UGRAF1 UTILITY WILL DISPLAY IT IN ITS PLOT
+C
+      SUBROUTINE RXSCLB(ZXLAB,INSC1,INSC2)
+C
+      use extrac2_mod
+C
+C
+C THE NEW SCALAR LABELS AND VALUES ARE STORED IN COMMON.
+C
+      CHARACTER*1 ZK0,ZDIG(3)
+      CHARACTER*10 ZXLAB(3)
+C
+      DATA ZDIG/'0','1','2'/
+C
+      INSC1=NUMSC+2
+      INSC2=NUMSC+3
+C
+      ZK0='X'
+      DO 5 IC=1,10
+        IF(ZXLAB(1)(IC:IC).NE.' ') GO TO 6
+ 5    CONTINUE
+      GO TO 7
+ 6    CONTINUE
+      ZK0=ZXLAB(1)(IC:IC)
+ 7    CONTINUE
+C
+      SCLAB(1,1)=ZK0//ZDIG(1)//':'//'       '
+      SCLAB(2,1)=ZXLAB(1)
+      SCLAB(3,1)=ZXLAB(3)
+C
+      DO 8 ISC=INSC1,INSC2
+        IOFF=ISC-NUMSC
+        SCLAB(1,ISC)=ZK0//ZDIG(IOFF)//'AVGLIM: '
+        SCLAB(2,ISC)=ZXLAB(1)
+        SCLAB(3,ISC)=ZXLAB(3)
+ 8    CONTINUE
+C
+      RETURN
+      END
+C******************** END FILE EXSCLB.FOR ; GROUP EXSUBS ******************

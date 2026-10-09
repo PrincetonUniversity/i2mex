@@ -1,0 +1,37 @@
+C******************** START FILE DATADD.FOR ; GROUP DATMGR ******************
+C-------------------------------------------------------------
+C  DATADD
+C
+C  COPY DATA FROM PASSED ARRAY INTO DATA BUFFER PART CORRESPONDING
+C  TO DATA ENTRY J
+C
+C  SPACE MUST PREVIOUSLY HAVE BEEN ALLOCATED
+C
+      SUBROUTINE DATADD(J,ZADD,INADD)
+      use datmgr_mod
+C
+      DIMENSION ZADD(INADD)
+C
+      IF(LOCD(J).EQ.0) THEN
+        WRITE(LUNDMO,1000)
+ 1000 FORMAT(' ?DATMGR -- ATTEMPT TO PUT DATA AT UNDEFINED LOCATION')
+        call bad_exit
+      ENDIF
+      ILIM=LOCD(LNEXT(J))-LOCD(J)
+      INP=NWDS(J)
+      NWDS(J)=INP+INADD
+      IF(NWDS(J).GT.ILIM) THEN
+        WRITE(LUNDMO,1001)
+ 1001   FORMAT(' ?DATMGR -- ADDED DATA OVERFLOWS BUFFER ALLOCATION')
+        WRITE(LUNDMO,1011) J,LOCD(J),NWDS(J),ILIM
+ 1011   FORMAT(1X,4I7)
+        call bad_exit
+      ENDIF
+C
+      DO 10 IJ=1,INADD
+      IL=LOCD(J)+INP+IJ-1
+      DATBUF(IL)=ZADD(IJ)
+ 10   CONTINUE
+      RETURN
+      END
+C******************** END FILE DATADD.FOR ; GROUP DATMGR ******************

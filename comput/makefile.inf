@@ -1,0 +1,130 @@
+#GNU Makefile to build Library libcomput.a 
+#
+#08/01/00 C. Ludescher
+#
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include  ../share/Make.local
+include ../share/Make.flags
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+ARC = $(OBJ)/lib/libcomput.a
+OBJDIR = $(OBJ)/obj/comput
+
+# don't rebuild library if using installed one in $PREFIX 
+ifeq ($(MAKELEVEL),0)
+	THISLIB=$(ARC)
+endif
+
+#=============================================================
+# f90 modules
+Mnams = periodic_table_mod.mod r8bsmoo_mod.mod catfus_mod.mod namerefs.mod submsg_mod.mod lincir_contour_mod.mod plasma_hash_code.mod
+Mobjs = periodic_table.o r8bsmoo_mod.o catfus_mod.o namerefs.o submsg.o lincir_contour.o plasma_hash_code.o 
+MODS = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+
+# fortran archive members
+F  = $(subst .f,.o, $(wildcard *.f)) $(subst .for,.o, $(wildcard *.for)) $(subst .F,.o, $(wildcard *.F))
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+CPP  = $(subst .cpp,.o, $(wildcard *.cpp)) $(subst .c,.o, $(wildcard *.c))
+MALL = $(F) $(F90) $(CPP) 
+
+MEM = $(foreach file,$(MALL),$(ARC)($(file)))
+
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE $(ARC)
+
+all:  libs 
+	@echo done  
+
+$(OLDLIB): timestamp.inf
+	@echo "--- DETECTED comput.a source update"
+	@echo "--- Re-Making $(ARC)"
+	@$(MAKE) libs
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/mod || mkdir -p $(OBJ)/mod
+	@test -d $(OBJ)/obj/comput || mkdir -p $(OBJ)/obj/comput
+	@if test ! -f $(LIBDIR)/libphysconst.a; then \
+	if test -f ../physconst/Makefile; then \
+	(cd ../physconst; $(MAKE) libs); fi; fi
+
+# compile
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT)  $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+$(ARC)(%.o): %.for
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT)  $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile fixed fortran code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile free form fortran 90 code
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+# compile c
+$(ARC)(%.o): %.c
+	$(c_proc)
+	$(make_ar)
+
+$(ARC)(%.o): %.cpp
+	$(cxx_proc)
+	$(make_ar)
+
+# Fortran modules
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+	@if test -d $(MDIR); then \
+	  (cd $(MDIR); rm -f $(MODULES)); fi
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libcomput.a || echo ">>> can not find $(ARC)";fi;  
+	@test -d $(MODDIR) || mkdir $(MODDIR)
+	@(cd $(MDIR); umask 133; cp $(MODULES) $(MODDIR)/)
+
+uninstall:
+	rm -f $(LIBDIR)/libcomput.a
+	(cd $(MODDIR); rm -f $(MODULES))

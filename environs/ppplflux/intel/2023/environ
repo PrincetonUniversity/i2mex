@@ -1,0 +1,51 @@
+module purge
+
+module load git
+
+module load intel/2023.2.0
+module load openmpi/4.1.6-intel-2023.2.0-f6nrfjk
+export FLIBROOT=/opt/pppl/intel/2023.2.0/compiler/2023.2.0/linux/compiler/lib/intel64_lin
+
+export FC=ifort
+export CC=icc
+export CXX=icpc
+
+export BLASHOME=$MKLROOT/lib/intel64
+export LAPACKHOME=$BLASHOME
+export L_BLAS=" -L$BLASHOME -lmkl_blas95_lp64"
+export L_LAPACK=" -L$LAPACKHOME -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential"
+
+module load openmpi-4.1.6/intel-2023.2.0/hdf5/1.14.6-c77my
+module load openmpi-4.1.6/intel-2023.2.0/netcdf-c/4.9.2-qpqoj
+module load openmpi-4.1.6/intel-2023.2.0/netcdf-cxx4/4.3.1-k3jqv
+module load openmpi-4.1.6/intel-2023.2.0/netcdf-fortran/4.6.1-bfskx
+module load libszip/2.1.1-intel-2023.2.0-bo3cg
+
+export L_NETCDF=" -L$NETCDF_F_HOME/lib -lnetcdff -L$NETCDF_C_HOME/lib64 -lnetcdf"
+
+
+module load pspline/2.0.1-build-20250811-intel-2023.2.0
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export EZCDF_HOME=/p/pshare/transp/opt/ezcdf/0.0.3/icc/2023
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+export UFILES_ROOT=/p/pshare/transp/opt/ufiles/0.4.1/intel/2023_hdf5
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+module load mdsplus/7.132.0-intel-2023.2.0
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+export FTN_MAIN=/opt/pppl/intel/2023.2.0/compiler/2023.2.0/linux/compiler/lib/intel64_lin/for_main.o
+export FTN_TRAILER="-L$FLIBROOT -lifport -lintlc -limf -lifcore -ldl -lm -lirc -lsvml"
+GCC_PATH=$(gcc -print-file-name=libstdc++.a)
+GCC_DIR=$(dirname $GCC_PATH)
+export CPP_TRAILER=" -L$GCC_DIR -lstdc++"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+

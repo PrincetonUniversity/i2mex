@@ -1,0 +1,140 @@
+export BUILD=${TRANSPHOME}/builds/${git_branch}
+export LOCAL=${BUILD}/icc/18
+
+export FORTRAN_VARIANT=Intel
+export INTEL_CXXLIB_ICC=1
+export GCC_VERSION=410
+
+export MAKE_SO=TRUE
+
+module load intel/2018
+export F90HOME=/fusion/usc/opt/intel2018/compilers_and_libraries_2018.2.199/linux/compiler
+export FLIBROOT=/fusion/usc/opt/intel2018/compilers_and_libraries_2018.2.199/linux/compiler/lib/intel64
+
+module load mpich/3.2-intel2018
+export MPI_FC_CMD_EXT=mpif90
+
+export INCLUDE_PATH=$(which mpiexec | sed 's/bin\/mpiexec.*/include/'):$INCLUDE_PATH
+export C_INCLUDE_PATH=$(which mpiexec | sed 's/bin\/mpiexec.*/include/'):$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$(which mpiexec | sed 's/bin\/mpiexec.*/include/')
+export LD_LIBRARY_PATH=$(which mpiexec | sed 's/bin\/mpiexec.*/lib/'):$LD_LIBRARY_PATH
+
+export MPI_CMD=$(which mpiexec)
+export MPI_CMD="${MPI_CMD} --bind-to none"
+
+export FORTRAN_COMMAND=mpif90
+export CC_COMMAND=mpicc
+export CX_COMMAND=mpicxx
+
+module load netcdf/4.4.1-mpich3.2-intel2018
+export NETCDF_ROOT=$NETCDF_DIR
+export NETCDF_C_HOME=$NETCDF_DIR
+export NETCDF_FORTRAN_HOME=$NETCDF_DIR
+export NETCDF_NO_2=1
+
+export MKLROOT=/fusion/usc/opt/intel2018/mkl
+export BLASHOME=$MKLROOT/lib/intel64
+export LAPACKHOME=$BLASHOME
+
+export SUPERLU_HOME=/home/sachdevj/other/superlu-5.2.1
+export SUPERLU_ROOT=$SUPERLU_HOME
+
+export SCALAPACKHOME=/home/sachdevj/other/scalapack-2.0.2
+
+export FANN_ROOT=/home/sachdevj/other/fann-2.2.0
+
+export FFTW_HOME=/home/sachdevj/other/fftw-3.3.8
+
+export PSPLINE_HOME=/home/sachdevj/other/pspline/builds/intel/2018
+export LD_LIBRARY_PATH=$PSPLINE_HOME/lib:$LD_LIBRARY_PATH
+
+export TGLF_ROOT=/home/sachdevj/other/gacode/builds/c310244b/icc/2018
+export LD_LIBRARY_PATH=$TGLF_ROOT/lib:$LD_LIBRARY_PATH
+
+export GLF23_ROOT=/home/sachdevj/other/gacode/builds/c310244b/icc/2018
+export LD_LIBRARY_PATH=$GLF23_ROOT/lib:$LD_LIBRARY_PATH
+
+export NEO_ROOT=/home/sachdevj/other/gacode/builds/transp_compatability/527cd18f/icc/2018
+export LD_LIBRARY_PATH=$NEO_ROOT/lib:$LD_LIBRARY_PATH
+
+export TORAY_GA_ROOT=/home/sachdevj/other/toray_ga/builds/a016f514/icc/2018
+export LD_LIBRARY_PATH=$TORAY_GA_ROOT/lib:$LD_LIBRARY_PATH
+
+export MMM_ROOT=/home/sachdevj/other/mmm/9.0.10/icc/2018
+export LD_LIBRARY_PATH=$MMM_ROOT/lib:$LD_LIBRARY_PATH
+
+export CQL3D_ROOT=/home/sachdevj/other/cql3d_f90/icc/2018
+export LD_LIBRARY_PATH=$CQL3D_ROOT/lib:$LD_LIBRARY_PATH
+
+export GENRAY_ROOT=/home/sachdevj/other/genray/builds/f0157afe/icc/2018
+export LD_LIBRARY_PATH=$GENRAY_ROOT/lib:$LD_LIBRARY_PATH
+
+export TORBEAM_ROOT=/home/sachdevj/other/torbeam_old/icc/2018
+export LD_LIBRARY_PATH=$TORBEAM_ROOT/lib:$LD_LIBRARY_PATH
+
+export LSCSQ_ROOT=/home/sachdevj/other/lscsq/builds/04f241e2/icc/2018
+export LD_LIBRARY_PATH=$LSCSQ_ROOT/lib:$LD_LIBRARY_PATH
+
+export UFILES_ROOT=/home/sachdevj/other/ufiles/builds/0.2.7/icc/2018
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+
+#export EXTERN_LIB_DAT=$TRANSPROOT/codesys/codata/external_libraries_pppl_r6_intel.dat
+
+
+# Delayed Eval, don't eval these paths until runtime
+export FTN_MAIN=/fusion/usc/opt/intel2018/lib/intel64/for_main.o
+export FTN_TRAILER="-L$FLIBROOT -lifport -lintlc -limf -lifcore -ldl -lm -lirc -lsvml"
+GCC_PATH=$(gcc -print-file-name=libstdc++.a)
+GCC_DIR=$(dirname $GCC_PATH)
+export CPP_TRAILER=" -L$GCC_DIR -lstdc++"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+
+export L_NETCDF=" -L$NETCDF_DIR/lib -lnetcdf -lnetcdff"
+export L_BLAS=" -L$BLASHOME -lmkl_blas95_lp64"
+export L_LAPACK=" -L$LAPACKHOME -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential"
+export L_SUPERLU=" -L$SUPERLU_ROOT/lib64 -lsuperlu $L_BLAS"
+export LMPI_BLACS=" -L$SCALAPACKHOME/lib -lscalapack"
+export LMPI_SCALAPACK=" -L$/SCALAPACKHOME/lib -lscalapack"
+
+export L_NNLIB=" -L$FANN_ROOT/lib -lfann"
+export C_INCLUDE_PATH=$FANN_ROOT/include:$C_INCLUDE_PATH
+export LD_LIBRARY_PATH=$FANN_ROOT/lib:$LD_LIBRARY_PATH
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export L_TGLF=" -L$TGLF_ROOT/lib -ltglf"
+export LMPI_TGLF=" -L$TGLF_ROOT/lib -ltglf"
+
+export L_GLF23=" -L$GLF23_ROOT/lib -lglf23"
+export LMPI_GLF23=" -L$GLF23_ROOT/lib -lglf23"
+
+export L_NEO=" -L$NEO_ROOT/lib -lneo -lgeo -lexpro -lmath -lumfpack -lbrainfuse"
+export LMPI_NEO=" -L$NEO_ROOT/lib -lneo -lgeo -lexpro -lmath -lumfpack -lbrainfuse"
+
+export L_TORAY_GA=" -L$TORAY_GA_ROOT/lib -ltoray_ga"
+export LMPI_TORAY_GA=" -L$TORAY_GA_ROOT/lib -ltoray_ga"
+
+export L_MMM=" -L$MMM_ROOT/lib -lmmm"
+export LMPI_MMM=" -L$MMM_ROOT/lib -lmmm"
+
+export L_CQL3D=" -L$CQL3D_ROOT/lib -lcql3d"
+export LMPI_CQL3D=" -L$CQL3D_ROOT/lib -lmpi_cql3d"
+
+export L_GENRAY=" -L$GENRAY_ROOT/lib -lgenray"
+export LMPI_GENRAY=" -L$GENRAY_ROOT/lib -lgenray"
+
+export L_TORBEAM=" -L$TORBEAM_ROOT/lib -ltorbeam"
+export LMPI_TORBEAM=" -L$TORBEAM_ROOT/lib -ltorbeam"
+
+export L_LSCSQ=" -L$LSCSQ_ROOT/lib -llscsq"
+export LMPI_LSCSQ=" -L$LSCSQ_ROOT/lib -llscsq"
+
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod"
+
+export L_IMAS=" "
+export LMPI_IMAS=" "

@@ -1,0 +1,131 @@
+      SUBROUTINE TFILOP(LUN,TFILN,IER)
+C
+      INTEGER LUN	      ! LOGICAL UNIT NO. TO USE FOR OPENING FILE
+C
+      CHARACTER*(*) TFILN   ! TF.PLN FILENAME
+C
+      INTEGER IER	      ! INTEGER ERROR CODE RETURNED 0=NORMAL
+C
+C  OPEN TF FILE -- PASSED NAME, NO DEPENDENCE ON CPLOTR COMMON
+C  USE CONDITION HANDLER FOR ERRORS
+C
+C  IF ERROR IS FILE NOT FOUND, CHECK THE LASER DISKS AND QUEUE A
+C  RESTORE REQUEST IF THE RUN EXISTS AND THE USER WANTS IT
+C
+C
+      SAVE IOPEN  ! REMEMBER IF ISAM FILE HAS BEEN OPENED
+C
+C----------------------------------------------------------------
+C
+C  LOCAL STUFF
+C
+      CHARACTER*10 RUNID
+      CHARACTER*7 TOKID
+C
+      CHARACTER*64 ZDIR
+      CHARACTER*20 ZDISK
+C
+C----------------------------------------------------------------
+c
+c  mod dmd feb 1997:  access protection code
+c
+      if(ier.lt.0) then
+         iquiet=1
+      else
+         iquiet=0
+      endif
+c
+      ier=0
+c
+      zdisk=' '
+      zdir=' '
+      CALL SHOWFILE(TFILN,ZDISK,ILDSK,ZDIR,ILD)
+      itra=index(zdir,'TRANSP.')
+      if(itra.gt.0) then
+         ildir=len(zdir)
+         call vprotec(zdir(itra+7:ildir),ier)
+         if(ier.gt.0) return
+      endif
+C
+      ILOOP=0
+ 10   CONTINUE
+      ILOOP=ILOOP+1
+C
+C  OPEN FILE
+C
+      close(unit=lun,err=11)
+ 11   continue
+      CALL GENOPEN(LUN,TFILN,'OLD','ASCII',0,IOS)
+C
+      IER=IOS
+C
+      IF(IER.EQ.0) GO TO 999
+C
+C  ERROR DETECTED
+C  WILL TRY TO HANDLE HERE IF THE ERROR IS FILE NOT FOUND AND IF THIS
+C  IS THE FIRST TRY
+C
+      IF((ILOOP.GT.1).OR.(IER.NE.IERFNOF(LUN))) GO TO 999
+C
+C  PARSE RUN ID AND DIRECTORY NAME OUT OF PASSED FILENAME.  IF DIRECTORY
+C  NAME NOT FOUND, FETCH IT WITH THE SHOWDEFL SUBROUTINE
+C
+      II=INDEX(TFILN,'TF.PLN')-1
+      IF(II.LE.0) GO TO 900
+ 
+      DO 20 IC=II,1,-1
+        IF((TFILN(IC:IC).EQ.']').OR.(TFILN(IC:IC).EQ.'>')) GO TO 30
+ 20   CONTINUE
+      IC=0
+C
+ 30   CONTINUE
+      IC1=IC+1
+      IF((II-IC1+1).GT.LEN(RUNID)) GO TO 900
+      RUNID=TFILN(IC1:II)  ! RUNID IS E.G. A 4 DIGIT TRANSP RUN NO.
+C
+      IF(IC.GT.0) THEN
+C  DIRECTORY IS INCLUDED IN TF FILENAME
+        IC2=IC
+        DO 40 IC=IC2,1,-1
+          IF((TFILN(IC:IC).EQ.'[').OR.(TFILN(IC:IC).EQ.'<')) GO TO 50
+ 40     CONTINUE
+        GO TO 900
+C
+ 50     CONTINUE
+        ILD=IC2-IC+1
+        ZDIR=TFILN(IC:IC2)
+C
+      ELSE
+C  NOT INCLUDED:  USING DEFAULT DIRECTORY; FETCH WITH A SHOWDEFL CALL
+        CALL SHOWDEFL(ZDISK,ILDSK,ZDIR,ILD)
+      ENDIF
+C
+C  EXTRACT TOKAMAK ID FROM DIRECTORY NAME
+C
+      IL=ILD-1
+      ICT=0
+      DO 60 IC=IL,1,-1
+        IF((ZDIR(IC:IC).EQ.'.').OR.
+     >       (ZDIR(IC:IC).EQ.'[').OR.(ZDIR(IC:IC).EQ.'<')) ICT=ICT+1
+        IF(ICT.EQ.2) GO TO 70
+ 60   CONTINUE
+      IC=0
+C
+ 70   CONTINUE
+      IC1=IC+1
+C
+      ILT=IL-IC1+1
+      IF(ILT.GT.LEN(TOKID)) GO TO 900
+C
+      TOKID=ZDIR(IC1:IL)  ! TOKID IS E.G. "TFTR.86" FOR 1986 TFTR RUNS
+C
+ 900  CONTINUE
+      if(iquiet.eq.0) write(6,9001,iostat=ios) TFILN
+ 9001 FORMAT(/
+     >' %TFILOP - FILE NOT FOUND'/
+     >'  FILENAME = ',A/)
+C
+ 999  CONTINUE
+      RETURN
+C
+      END
