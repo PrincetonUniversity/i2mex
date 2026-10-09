@@ -1,0 +1,25 @@
+# This collection of actions belongs to the PSFC site,
+#   ie, general to all compilers at PSFC.
+#   they do not use environment modules at PSFC
+#   and they only have gnu compilers, version 7.5.0
+
+#module purge
+
+export INCLUDE_PATH=/usr/include
+
+#module load git
+#module load mdsplus/6.1.84
+export MDSPLUS=/usr/local/mdsplus
+export MDSPLUS_DIR=/usr/local/mdsplus
+export MDSPLUS_ROOT=/usr/local/mdsplus
+export INCLUDE_PATH=$MDSPLUS_DIR/include:$INCLUDE_PATH
+
+
+#export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el6_10.x86_64
+#export PATH=$JAVA_HOME/bin:$PATH
+#export INCLUDE_PATH=$JAVA_HOME/include:$INCLUDE_PATH
+#export INCLUDE_PATH=$JAVA_HOME/include/linux:$INCLUDE_PATH
+#export LD_LIBRARY_PATH=$JAVA_HOME/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=$JAVA_HOME/lib/amd64:$LD_LIBRARY_PATH
+
+export AR_TIMESTAMP=1

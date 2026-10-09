@@ -1,0 +1,71 @@
+C-----------------------------------------------------------------------
+C  STR_CBC -- UNIX PORTABLE REPLACEMENT FOR STR$CASE_BLIND_COMPARE
+C
+      INTEGER FUNCTION STR_CBC(STRING1,STRING2)
+C
+      implicit NONE
+C
+      CHARACTER*(*) STRING1,STRING2
+C
+C  RETURN STR_CBC = -1 IF STRING1 < STRING2
+C  RETURN STR_CBC = 0  IF STRING1 = STRING2
+C  RETURN STR_CBC = +1 IF STRING1 > STRING2
+C
+      CHARACTER*1 CHAR1,CHAR2
+C
+      CHARACTER*26 ALPHAB(2)
+C
+      LOGICAL, external :: LXASC
+C
+      integer il1,il2,ilnurd,imaxl,ic,ia1,ia2
+C
+      DATA ALPHAB/'abcdefghijklmnopqrstuvwxyz',
+     >              'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/
+C
+C  LENGTHS W/O TRAILING BLANKS ...
+C
+      IL1=ILNURD(STRING1)
+      IL2=ILNURD(STRING2)
+C
+      IMAXL=MAX(IL1,IL2)
+C
+      STR_CBC=0
+      IF(IMAXL.EQ.0) GO TO 100
+C
+C  LOOP THROUGH CHARACTERS
+C
+      DO IC=1,IMAXL
+        IF(IC.LE.IL1) THEN
+          CHAR1=STRING1(IC:IC)
+        ELSE
+          CHAR1=' '
+        ENDIF
+        IF(IC.LE.IL2) THEN
+          CHAR2=STRING2(IC:IC)
+        ELSE
+          CHAR2=' '
+        ENDIF
+C  CAPITALIZE IF NECESSARY
+        IA1=INDEX(ALPHAB(1),CHAR1)
+        IA2=INDEX(ALPHAB(1),CHAR2)
+C
+        IF(IA1.GT.0) CHAR1=ALPHAB(2)(IA1:IA1)
+        IF(IA2.GT.0) CHAR2=ALPHAB(2)(IA2:IA2)
+C
+        IF(LXASC(CHAR1,'GT',CHAR2)) THEN
+          STR_CBC=1
+          GO TO 100
+        ENDIF
+C
+        IF(LXASC(CHAR1,'LT',CHAR2)) THEN
+          STR_CBC=-1
+          GO TO 100
+        ENDIF
+C
+      ENDDO
+C
+C  STRINGS ARE EQUAL IF WE FALL THROUGH THE LOOP
+C
+ 100  CONTINUE
+      RETURN
+      END

@@ -1,0 +1,115 @@
+#GNU Makefile to build Library libtr_getnl.a 
+#
+#10/15/01 C. Ludescher : created
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include  ../share/Make.local
+include ../share/Make.flags
+
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+ifdef SHARED
+	FFLAGS := $(FFLAGS) $(X_FFLAGS)
+endif
+
+ARC = $(OBJ)/lib/libtr_getnl.a
+OBJDIR = $(OBJ)/obj/tr_getnl
+
+# don't rebuild library if using installed one in $PREFIX 
+ifeq ($(MAKELEVEL),0)
+	THISLIB=$(ARC)
+endif
+
+#=============================================================
+# f90 modules
+Mnams = tr_getnl.mod 
+Mobjs = tr_getnl.o
+ 
+MODS = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+ 
+# fortran archive members
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+FMEM = $(F90) 
+
+#remove test programs
+
+MEM = $(foreach file,$(FMEM),$(ARC)($(file)))
+
+OBJECTS = $(foreach file,$(Mobjs) $(FMEM), $(OBJDIR)/$(file))
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE  $(ARC)
+ 
+all:  libs  
+	@echo done  
+
+$(OLDLIB): timestamp.inf
+	@echo "--- DETECTED tr_getnl.a source update"
+	@echo "--- Re-Making $(ARC)"
+	@$(MAKE) libs
+
+FORCE: 
+	@test -d $(OBJDIR) || mkdir -p $(OBJDIR)
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/mod || mkdir -p $(OBJ)/mod
+
+ 
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+
+
+
+ 
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile free form fortran 90 code
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+#
+#---------------------------------------------------
+#
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+	@(cd $(MDIR); rm -f $(MODULES))
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libtr_getnl.a || echo ">>> can not find $(ARC)";fi
+	@test -d $(MODDIR) || mkdir -p $(MODDIR)
+	@(cd $(MDIR); umask 133; cp $(MODULES) $(MODDIR)/)
+
+uninstall:
+	rm -f $(LIBDIR)/libtr_getnl.a
+	@(cd $(MODDIR); rm -f $(MODULES))

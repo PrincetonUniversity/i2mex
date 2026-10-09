@@ -1,0 +1,11 @@
+real*8 version of TRANSP "bloat" facility -- adhoc extrapolation of
+polar grid past plasma bdy.
+
+
+** for updates use the r8bloat_csh script to generate this library source
+from the real*4 versions of the software ** (you need to be in a TRANSP
+developer environment for this to work).
+
+  -- dmc 30 Nov 1999
+
+

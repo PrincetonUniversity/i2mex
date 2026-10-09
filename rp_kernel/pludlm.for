@@ -1,0 +1,39 @@
+C-------------------------------------------------------------------
+C  PLUDLM  DELIMIT UNITS LABEL FOR PLUCHK
+C
+      SUBROUTINE PLUDLM(LBL,ILEN,IC1,IC2)
+C
+C  INPUT LBL -- PLOT FCN UNITS LABEL
+C  OUTPUT  ILEN -- "EFFECTIVE" LENGTH = IC2 - IC1 +1
+C          IC1  -- FIRST NONBLANK CHARACTER
+C          IC2  -- LAST NONBLANK, NON "$" CHARACTER
+C
+C  "$" IS AN SGLIB DELIMITTER CHARACTER
+C
+      CHARACTER*(*) LBL
+C
+      ILEN=LEN(LBL)
+C
+      DO 10 IC=ILEN,1,-1
+        IF((LBL(IC:IC).NE.' ').AND.(LBL(IC:IC).NE.'$')) GO TO 20
+ 10   CONTINUE
+C  ... ALL BLANK
+      IC1=0
+      IC2=0
+      ILEN=0
+      RETURN
+C
+ 20   CONTINUE
+      IC2=IC
+C
+      DO 30 IC=1,IC2
+        IF(LBL(IC:IC).NE.' ') GO TO 40
+ 30   CONTINUE
+C
+ 40   CONTINUE
+      IC1=IC
+C
+      ILEN=IC2-IC1+1
+      RETURN
+C
+      END

@@ -1,0 +1,75 @@
+C******************** START FILE DMGBSF.FOR ; GROUP DATMGR ******************
+C--------------------------------------------------------------
+C  DMGBSF(ISIZE,JLOC)
+C
+C  FIND FREE SLOT WITH BEST FIT FOR ALLOCATION OF SIZE ISIZE
+C  IF ISIZE=0 FIND BIGGEST AVAILABLE FREE SLOT
+C  IF ISIZE.LT.0 FIND *FIRST* AVAILABLE FREE SLOT OF ANY SIZE
+C
+C  RETURN JLOC=PTR TO DESCRIPTOR BLOCK FOR SLOT (WHICH IS INIT-
+C  IALIZED HERE)
+C
+      SUBROUTINE DMGBSF(ISIZE,JLOC,IPRIO)
+C
+      use datmgr_mod
+C
+C------------------------
+C
+      JSAV=0
+ 5    continue
+      ISIZL=0
+      JST=1
+C  SEARCH LOOP
+ 10   CONTINUE
+      IF(LOCD(JST).GT.NDBSIZ) GO TO 100
+C  END OF STORAGE BLOCK JST
+      IF1=LOCD(JST)+NWDS(JST)
+      JNEXT=LNEXT(JST)
+C  BEGINNING OF NEXT BLOCK
+      IF2=LOCD(JNEXT)-1
+C  SIZE OF FREE BLOCK INBETWEEN
+      ISFREE=IF2-IF1+1
+      IF(ISFREE.LE.0) GO TO 90
+C  LARGEST FREE BLOCK?
+      IF(ISIZE.LT.0) GO TO 50
+      IF((ISIZE.EQ.0).AND.(ISFREE.GT.ISIZL)) GO TO 50
+C  BEST FIT BLOCK?
+      IF((ISIZE.GT.0).AND.(ISFREE.GE.ISIZE).AND.
+     >   (((ISFREE-ISIZE).LT.(ISIZL-ISIZE)).OR.(ISIZL.EQ.0))) GO TO 50
+C
+      GO TO 90
+C
+C  MARK THIS SLOT AS BEST ONE YET
+C
+ 50   CONTINUE
+      ISIZL=ISFREE
+      JSAV=JST
+      IF(ISIZE.LT.0) GO TO 100
+C  END OF LOOP
+ 90   CONTINUE
+      JST=JNEXT
+      GO TO 10
+C
+C  EXIT
+C
+ 100  CONTINUE
+C  EXIT IF NO BIG ENOUGH FREE SLOT WAS FOUND
+      JLOC=0
+      IF((ISIZE.LE.0).AND.(JSAV.EQ.0)) THEN
+         ! have to find a slot, if ISIZE<=0
+         write(6,*) ' dmgbsf: isize=',isize,' jsav=',jsav
+         call dmg_datbuf_expand(0)
+         go to 5
+      ENDIF
+C
+      if(JSAV.EQ.0) then
+         return
+      endif
+C
+C  FOUND SPACE FOR SLOT-- CREATE ENTRY
+C
+      call dmg_macc_incr
+      CALL DMINEW(JSAV,JLOC,IPRIO)
+      RETURN
+      END
+C******************** END FILE DMGBSF.FOR ; GROUP DATMGR ******************

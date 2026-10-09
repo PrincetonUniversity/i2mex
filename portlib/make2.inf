@@ -1,0 +1,193 @@
+#GNU Makefile to build portlib.a & mpi_portlib.a 
+#
+#01/08/09 C. Ludescher-Furth
+#
+
+# define system dependent flags, etc.
+-include ../share/Make.local
+include ../share/Make.flags
+
+# portlib special flags not covered by Make.depends:
+FFLAGS := $(FFLAGS) $(STATIC)
+
+# destination for processed source
+# Check if user specified LOCAL or OBJ
+# if run as a sub_make
+ifneq ($(MAKELEVEL),0)
+# check for LOCAL in case invoked via ufiles
+ifeq ("${LOCAL}",".")
+	OBJ = ..
+endif
+# check for LOCAL in case invoked via sglib
+ifeq ("${LOCAL}","..")
+	OBJ = ..
+endif
+# if envoced via anything else
+ifeq ("$(OBJ)",".")
+	override OBJ = ..
+endif
+endif
+
+ifneq ("$(wildcard $(LIBROOT)/include/readline*)","")
+	INCFLAGS := $(INCFLAGS) $(IOPT)$(LIBROOT)/include
+endif
+
+OBJDIR = $(OBJ)/obj/portlib
+
+ifdef EDITLIBS
+	CDEFS := $(CDEFS) -D__GETLINE_EDITOR
+endif
+
+
+ifdef MPI_ACTIVATE
+  ARC = $(OBJ)/lib/libmpi_portlib.a
+  PLIB = mpi_portlib
+  MDIR = $(OBJ)/mpi_mod
+  Z := $(MODDIR:mod=mpi_mod)
+  MODDIR = $(Z)
+  MODFLAGS := $(MFLAGS)$(MDIR) $(MODFLAGS)
+  FC   = $(MPI_FC)
+  FC90 = $(MPI_FC)
+  CC   = $(MPI_CC)
+  CXX  = $(MPI_CXX)
+  FFLAGS = $(MPI_FFLAGS)
+  DFFLAGS = $(MPI_DFFLAGS)
+  CFLAGS = $(MPI_CFLAGS)
+  DCFLAGS = $(MPI_DCFLAGS)
+  CXXFLAGS = $(MPI_CXXFLAGS)
+  DCXXFLAGS = $(MPI_DCXXFLAGS)
+  LDFLAGS = $(MPI_LDFLAGS)
+  DEFS  := $(DEFS) -D__MPI
+  CDEFS := $(CDEFS) -D__MPI
+else
+  ARC = $(OBJ)/lib/libportlib.a
+  PLIB = portlib
+endif
+
+ifdef DEBUG
+	FFLAGS   := $(DFFLAGS) $(STATIC)
+	CFLAGS   := $(DCFLAGS) $(STATIC)
+	CXXFLAGS := $(DCXXFLAGS) $(STATIC)
+        LDFLAGS  := $(LDFLAGS) -g
+endif
+
+# do not rebuild library if using installed one in $PREFIX
+ifeq ($(MAKELEVEL),0)
+	THISLIB=$(ARC)
+endif
+
+#========================================================================
+
+# f90 modules
+#public Module names
+Mnams = mpi_proc_data.mod mpi_env_mod.mod logmod.mod execsystem.mod
+# source file names
+Mobjs = mpi_proc_data.o mpi_env_mod.o logmod.o execsystem.o
+
+ 
+MODS = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+
+# .f9f and .F sources
+F9 = $(subst .F90,.o, $(wildcard *.F90)) $(subst .f90,.o, $(wildcard *.f90))
+F =  $(subst .F,.o, $(wildcard *.F)) $(subst .f,.o, $(wildcard *.f)) $(subst .for,.o, $(wildcard *.for))
+C =  $(subst .c,.o,$(wildcard *.c))
+ALLM = $(C) $(F9) $(F)
+
+MEM = $(foreach file,$(ALLM),$(ARC)($(file)))
+
+.PHONY: libs ckdirs clean realclean
+
+libs:  ckdirs $(ARC)
+	@if test ! -f $(OBJ)/lib/portlib.a; then \
+	(cd $(OBJ)/lib; ln -s libportlib.a portlib.a); fi
+
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+
+$(OLDLIB): timestamp.inf
+	@echo "--- DETECTED portlib.a source update"
+	@echo "--- Re-Making $(ARC)"
+	@$(MAKE) libs
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process / compile free form       
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+# pre-pocess / compile fixed form
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+# compile fixed
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+$(ARC)(%.o): %.for
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# compile c
+$(ARC)(%.o): %.c
+	$(c_proc)
+	$(make_ar)
+
+
+# create destination directories if needed
+ckdirs:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/obj/portlib || mkdir -p $(OBJ)/obj/portlib
+	@test -d $(MDIR) || mkdir $(MDIR)
+
+all:  libs exec
+	@echo done  
+
+exec: chkdir2 $(PLIST)
+
+chkdir2:
+	@test -d $(OBJ)/test || mkdir -p $(OBJ)/test
+	@test -d $(OBJ)/obj/portlib || mkdir -p $(OBJ)/obj/portlib
+
+$(PLIST): $(OBJDIR)/$(PLOBJ) $(THISLIB) 
+	$(FC) $(LDFLAGS) -o $@ $< -L$(OBJ)/lib -l$(PLIB) $(XFLIB)
+
+install: 
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/lib$(PLIB).a || echo ">>> can not find $(ARC)";fi;
+	@test -d $(MANDIR)/man3 || mkdir -p $(MANDIR)/man3
+	@umask 133; cp portlib.3 $(MANDIR)/man3/
+	@test -d $(MODDIR) || mkdir $(MODDIR)
+	@(cd $(MDIR); umask 133; cp $(MODULES) $(MODDIR)/)
+	@test -d $(BINDIR) || mkdir $(BINDIR)
+	@(umask 022; cp $(PLIST) $(BINDIR)/)
+
+
+uninstall:
+	rm $(LIBDIR)/lib$(PLIB).a
+	rm $(MANDIR)/man3/portlib.3
+	(cd $(MODDIR); rm -f $(MODULES))
+	(cd $(BINDIR); rm *portlib_env_test )
+
+clean: 
+	@rm -f $(OBJDIR)/*.o 
+
+realclean: clean
+	@rm -f $(ARC)
+	@if test -d $(MDIR); then \
+	(cd $(MDIR); rm -f $(MODULES)); fi
+

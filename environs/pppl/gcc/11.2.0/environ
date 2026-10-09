@@ -1,0 +1,41 @@
+module purge
+
+module load git
+
+module load gcc/11.2.0
+export FLIBROOT=$(echo $LD_LIBRARY_PATH | sed 's/:.*//')
+export F90HOME=$GCC_HOME
+
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+
+export L_BLAS=" -L/usr/lib64 -lopenblas"
+export L_LAPACK=" -L/usr/lib64 -lopenblas"
+
+module load netcdf-c/4.8.1
+module load netcdf-fortran/4.5.4
+export L_NETCDF=" -L$NETCDF_FORTRAN_HOME/lib -lnetcdff -L$NETCDF_C_HOME/lib -lnetcdf"
+export NETCDFHOME=$NETCDF_FORTRAN_HOME
+
+module load pspline
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export EZCDF_HOME=/p/pshare/transp/opt/ezcdf/0.0.3/gcc/11.2
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+export UFILES_ROOT=/p/pshare/transp/opt/ufiles/0.3.1/gcc/11.2
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+module load mdsplus
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"

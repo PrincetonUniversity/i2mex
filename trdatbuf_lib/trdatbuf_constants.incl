@@ -1,0 +1,7 @@
+! useful trdatbuf_lib constants...
+
+      integer, parameter :: TDB_MOMS_RCOS = 1
+      integer, parameter :: TDB_MOMS_RSIN = 2
+      integer, parameter :: TDB_MOMS_ZCOS = 3
+      integer, parameter :: TDB_MOMS_ZSIN = 4
+

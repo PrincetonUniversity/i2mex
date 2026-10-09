@@ -1,0 +1,19 @@
+C******************** START FILE IXSHFT.FOR ; GROUP IXCALC ******************
+C---------------------------------------------------------------
+C  IXSHFT
+C
+C  SHIFT INTEGRATION RESULTS S.T. INTEGRAL=0 AT SPECIFIED LOWER LIMIT
+C
+      SUBROUTINE IXSHFT(ZF1,ZF2,INX,ZX0L,ZSHIF1,ZSHIF2)
+C
+      REAL ZF1(INX),ZF2(INX)
+C
+      ZSHIF1=XINTRP(ZF1,INX,ZX0L,ZSHIF1)
+      ZSHIF2=XINTRP(ZF2,INX,ZX0L,ZSHIF2)
+      DO 10 IX=1,INX
+      ZF1(IX)=ZF1(IX)-ZSHIF1
+      ZF2(IX)=ZF2(IX)-ZSHIF2
+ 10   CONTINUE
+      RETURN
+      END
+C******************** END FILE IXSHFT.FOR ; GROUP IXCALC ******************

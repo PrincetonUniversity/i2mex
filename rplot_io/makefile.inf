@@ -1,0 +1,104 @@
+#GNU Makefile to build Library librplot_io.a 
+#
+#08/01/00 C. Ludescher
+#
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include ../share/Make.local
+include ../share/Make.flags
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+
+ARC = $(OBJ)/lib/librplot_io.a
+OBJDIR = $(OBJ)/obj/rplot_io
+
+INCFLAGS := $(INCFLAGS) $(IOPT)$(NETCDF_DIR)/include
+
+#=============================================================
+# f90 modules
+#public Module names
+Mnams = wkbuf_mod.mod
+
+# source file names
+Mobjs = wkbuf_mod.o
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+ 
+# fortran archive members
+F  = $(subst .f,.o, $(wildcard *.f)) $(subst .F,.o, $(wildcard *.F))
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+FALL = $(F) $(F90)
+MEM = $(foreach file,$(FALL),$(ARC)($(file)))
+
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE $(ARC)
+ 
+all:  libs 
+	@echo done  
+
+$(OLDLIB): timestamp.inf
+	@echo "--- DETECTED rplot_io.a source update"
+	@echo "--- Re-Making $(ARC)"
+	@$(MAKE) libs
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/obj/rplot_io || mkdir -p $(OBJ)/obj/rplot_io
+	@if test ! -f $(LIBDIR)/librplot_mod.a; then \
+	if test -f ../rplot_mod/Makefile; then \
+	(cd ../rplot_mod; $(MAKE) libs); fi; fi
+
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+ 
+# compile 
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT)  $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile fixed fortran code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/librplot_io.a || echo ">>> can not find $(ARC)";fi
+
+uninstall:
+	rm -f $(LIBDIR)/librplot_io.a

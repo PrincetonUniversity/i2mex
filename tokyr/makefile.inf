@@ -1,0 +1,85 @@
+#GNU Makefile to build Library libtokyr.a 
+#
+#04/22/00 C. Ludescher
+#
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include ../share/Make.local
+include ../share/Make.flags
+
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+ARC = $(OBJ)/lib/libtokyr.a
+OBJDIR = $(OBJ)/obj/tokyr
+
+#=============================================================
+ 
+# fortran archive members
+FALL  = $(subst .f,.o, $(wildcard *.f)) $(subst .F,.o, $(wildcard *.F)) $(subst .f90,.o, $(wildcard *.f90))
+MEM = $(foreach file,$(FALL),$(ARC)($(file)))
+
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE $(ARC)
+
+all:  libs 
+	@echo done  
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/obj/tokyr || mkdir -p $(OBJ)/obj/tokyr
+
+$(ARC): $(MEM)
+	@$(RANLIB) $@ > /dev/null
+ 
+
+#pre-process/compile fixed length fortran code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+# compile 
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) -I./ $(INCFLAGS) $(OUT)  $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile fixed fortran code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libtokyr.a || echo ">>> can not find $(ARC)";fi;  
+
+uninstall:
+	rm -f $(LIBDIR)/libtokyr.a

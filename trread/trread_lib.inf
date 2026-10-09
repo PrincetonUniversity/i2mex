@@ -1,0 +1,4 @@
+Library of routines for callable interface to TRANSP output
+(RPLOT data).  Cleaned up and updated for NetCDF RPLOT data, dmc
+19 Nov 1997.
+

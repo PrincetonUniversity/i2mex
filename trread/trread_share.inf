@@ -1,0 +1,18 @@
+# -name      => this library is a dependent of the currently defined library
+# @PHONY     => phony library, does not exist -- name used to group dependencies
+# @LITERAL string => string is used for defining dependencies
+# @C++       => this library explicitly requires C++ linkage
+# @VERSION num1 num2 ... => version numbers
+# @TERMINAL  => this library can not be used as a dependency of another library
+# @STATIC    => build only a static library in shlib (not applicable for exe sources)
+#
+
++trread
+ -FORTRAN
+ -portlib
+ -comput
+ -rp_kernel
+ -tr_getnl
+ -rplot_io
+ -vaxonly
+ -xdatmgr

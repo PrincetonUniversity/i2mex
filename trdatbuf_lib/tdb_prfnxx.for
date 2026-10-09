@@ -1,0 +1,90 @@
+C---------------------------------------------------------------
+C  TDB_PRFNXX
+C   FIND NEXT INTERSECTION OF LINE Y=CONSTANT IN PROFILE Y(X)
+C
+      SUBROUTINE TDB_PRFNXX(ZY,ZX,INUM,ZYC,ZX1,ZX2,IFOUND)
+C
+!============
+! idecl:  explicitize implicit INTEGER declarations:
+      IMPLICIT NONE
+      INTEGER, PARAMETER :: R8=SELECTED_REAL_KIND(12,100)
+      INTEGER inum,ifound,i,istart,ilast,ip1,i2
+!============
+! idecl:  explicitize implicit REAL declarations:
+      REAL*8 zx,zyc,zx1,zx2,zy,zmax
+!============
+      DIMENSION ZY(INUM),ZX(INUM)
+C
+C  ZY,ZX (INUM)  INPUT PROFILE
+C   ZYC  CONSTANT Y VALUE.  LOOK FOR INTERSECTIONS OF PROFILE WITH
+C        LINE Y=ZYC (INPUT)
+C   ZX1  INPUT STARTING LOCATION FOR SEARCH
+C   ZX2  OUTPUT INTERSECTION LOCATED
+C IFOUND OUTPUT =1 IF INTERSECTION FOUND, 0 OTHERWISE
+C
+      zx2=zx1
+      IFOUND=0
+C  RETURN ZX2=ZX1 IF ZYC= THE MAXIMUM IN THE PROFILE
+      ZMAX=ZY(1)
+      DO 5 I=1,INUM
+      ZMAX=max(ZMAX,ZY(I))
+ 5    CONTINUE
+      IF(ZMAX.NE.ZYC) GO TO 7
+      IFOUND=1
+      ZX2=ZX1
+      GOTO 1000
+C
+ 7    CONTINUE
+C
+C  LOCATE STARTING INDEX
+      DO 10 I=1,INUM
+      IF(ZX(I).GT.ZX1) GO TO 20
+ 10   CONTINUE
+C  NO SUCH POINT
+      GOTO 1000
+ 20   CONTINUE
+      ISTART=I
+C  CANNOT START AT END
+      IF(ISTART.EQ.INUM) GOTO 1000
+C
+      ILAST=INUM-1
+C
+C  SCAN FOR INTERSECTIONS
+C
+      DO 30 I=ISTART,ILAST
+      IP1=I+1
+      IF((ZY(I).GT.ZYC).AND.(ZY(IP1).LE.ZYC)) GO TO 35
+      IF((ZY(I).LT.ZYC).AND.(ZY(IP1).GE.ZYC)) GO TO 35
+      GO TO 30
+C  CHECK THAT POINT ZY(IP1) NOT A LOCAL SINGULARITY
+ 35   CONTINUE
+      IF(ZY(IP1).NE.ZYC) GO TO 40
+      IF(IP1.EQ.INUM) GO TO 40
+      I2=IP1+1
+      IF(ZY(IP1).EQ.ZY(I2)) I2=min(INUM,I2+1)
+C  IGNORE INTERSECTION IF IT IS JUST "KISSING" A LOCAL EXTREMUM
+      IF((ZY(I).GT.ZY(IP1)).AND.(ZY(I2).GT.ZY(IP1))) GO TO 30
+      IF((ZY(I).LT.ZY(IP1)).AND.(ZY(I2).LT.ZY(IP1))) GO TO 30
+      GO TO 40
+C
+ 30   CONTINUE
+C  NO SUCH POINT
+      GOTO 1000
+C  INTERSECTION FOUND
+ 40   CONTINUE
+      IFOUND=1
+      IF(ZY(I).NE.ZY(IP1)) GO TO 50
+      ZX2=ZX(IP1)
+      GOTO 1000
+C
+ 50   CONTINUE
+      ZX2=ZX(I)+(ZX(IP1)-ZX(I))*(ZY(I)-ZYC)/(ZY(I)-ZY(IP1))
+      GOTO 1000
+C-------
+ 1000 continue
+cdbg      write(6,1001) zyc,zx1,zx2,ifound
+cdbg 1001 format(' TDB_PRFNXX zyc=',1x,1pe13.6,' zx1,zx2=',2(1x,1pe13.6),
+cdbg     >   ' ifound = ',i2)
+      return
+C
+      	END

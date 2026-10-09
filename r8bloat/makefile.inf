@@ -1,0 +1,82 @@
+#GNU Makefile to build Library libr8bloat.a 
+#
+#06/21/00 C. Ludescher
+#
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include ../share/Make.local
+include ../share/Make.flags
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+
+ARC = $(OBJ)/lib/libr8bloat.a
+OBJDIR = $(OBJ)/obj/r8bloat
+
+#=============================================================
+# f90 modules
+ 
+# fortran archive members
+FALL = $(subst .F,.o, $(wildcard *.F)) $(subst .f,.o, $(wildcard *.f)) $(subst .for,.o, $(wildcard *.for))
+MEM = $(foreach file,$(FALL),$(ARC)($(file)))
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE $(ARC)
+ 
+all:  libs 
+	@echo done  
+
+$(OLDLIB): timestamp.inf
+	@echo "--- DETECTED r8bloat.a source update"
+	@echo "--- Re-Making $(ARC)"
+	@$(MAKE) libs
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/obj/r8bloat || mkdir -p $(OBJ)/obj/r8bloat
+
+$(ARC): $(MEM)
+	@$(RANLIB) $@ > /dev/null
+ 
+#pre-process/compile fixed length fortran 90 code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile fixed length fortran 90 code
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+$(ARC)(%.o): %.for
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libr8bloat.a || echo ">>> can not find $(ARC)";fi;
+
+uninstall:
+	rm -f $(LIBDIR)/libr8bloat.a

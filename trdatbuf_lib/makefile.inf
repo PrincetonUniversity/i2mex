@@ -1,0 +1,185 @@
+#GNU Makefile to build Library libtrdatbuf_lib.a 
+#
+#10/21/05 C. Ludescher-Furth : created
+
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include  ../share/Make.local
+include ../share/Make.flags
+
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+INCFLAGS := $(INCFLAGS) $(IOPT)$(UFILES_ROOT)/mod $(IOPT)$(NETCDF_DIR)/include
+
+ifdef SHARED
+	FFLAGS := $(FFLAGS) $(X_FFLAGS)
+endif
+
+ARC = $(OBJ)/lib/libtrdatbuf_lib.a
+OBJDIR = $(OBJ)/obj/trdatbuf_lib
+
+# don't rebuild library if using installed one in $PREFIX 
+ifeq ($(MAKELEVEL),0)
+	THISLIB=$(ARC)
+endif
+
+#=============================================================
+# f90 modules
+#public Module names
+Mnams = trdatbuf_module.mod trdatbuf_obj.mod trdatbuf_aux.mod \
+	trdatbuf_iface.mod trdatbuf_intmod.mod tdbsub_uts.mod \
+	tdb_static.mod
+# source file names
+Mobjs =  trdatbuf_obj.o trdatbuf_aux.o trdatbuf_iface.o \
+	trdatbuf_module.o trdatbuf_intmod.o tdbsub_uts.o \
+	tdb_static.o
+
+MODS = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+
+# fortran archive members
+F  = $(subst .f,.o, $(wildcard *.f)) $(subst .F,.o, $(wildcard *.F))
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+FALL = $(F) $(F90) 
+
+#remove test programs
+FMEM =$(filter-out trdatbuf_test.o, $(FALL)) 
+MEM = $(foreach file,$(FMEM),$(ARC)($(file)))
+
+OBJECTS = $(foreach file,$(Mobjs) $(FMEM), $(OBJDIR)/$(file))
+
+LDLIBS = -L$(OBJ)/lib -ltrdatbuf_lib $(LLOC) \
+         -lcomput -lportlib $(L_UFILES) \
+         $(L_PSPLINE)
+
+srcdir = $(shell pwd)
+testdir = $(shell cd $(OBJ)/test; pwd)
+DATA    = $(shell $(LS)  *.CDF)
+
+.PHONY: clean realclean checkdir all exec
+
+libs: FORCE  $(ARC)
+
+all:  libs exec 
+	@echo done  
+
+FORCE: chkdirs
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/mod || mkdir -p $(OBJ)/mod
+
+chkdirs:
+	@test -d $(OBJ)/obj/trdatbuf_lib || mkdir -p $(OBJ)/obj/trdatbuf_lib
+	@test -d $(OBJ)/test || mkdir $(OBJ)/test
+
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+
+
+so: FORCE $(OBJ)/lib/libtrdatbuf_lib.so
+
+$(OBJ)/lib/libtrdatbuf_lib.so: $(OBJECTS)
+	$(LD) $(X_LDFLAGS) -o $@ $(RPATH) $(OBJECTS)
+
+#pre-process/compile fixed length fortran 90 code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile fixed length fortran 90 code
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile free form fortran 90 code
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+#
+#---------------------------------------------------
+#
+# Build Test Programs
+#=====================
+# pre-pocess / compile .F
+$(OBJDIR)/%.o: %.F90
+	$(F90_proc)
+
+$(OBJDIR)/%.o: %.F
+	$(F_proc)
+
+$(OBJDIR)/%.o: %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $@ $<
+	$(mv_mod)
+
+$(OBJDIR)/%.o: %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $@ $<
+	$(mv_mod)
+
+exec: chkdirs chktest $(OBJ)/test/trdatbuf_test
+
+
+chktest:
+	@for i in $(DATA); do \
+	(cd $(OBJ)/test; $(TSTLNK) $$i || ln -s $(srcdir)/$$i $$i;) done 
+
+execso: so chktest $(OBJ)/test/trdatbuf_test_s
+$(OBJ)/test/trdatbuf_test_s: $(OBJDIR)/trdatbuf_test.o \
+		$(OBJ)/lib/libtrdatbuf_lib.so
+	$(FC) $(LDFLAGS) -o $(OBJ)/test/trdatbuf_test_s \
+	$(OBJDIR)/trdatbuf_test.o   \
+	$(LDLIBS) $(LUSRLIB) $(NETCDF) $(XFLIB) $(XLIBS)
+
+
+$(OBJ)/test/trdatbuf_test: $(OBJDIR)/trdatbuf_test.o $(THISLIB)
+	$(FC) $(LDFLAGS) -o $@ $< $(LDLIBS) \
+	      $(LUSRLIB) $(NETCDF) $(XFLIB) $(XLIBS)
+
+
+
+#-------------------------------------------------------------------------
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@test -d $(BINDIR) || mkdir -p $(BINDIR)
+	@umask 022; cp $(OBJ)/test/trdatbuf_test $(BINDIR)/
+	@umask 133; cp $(OBJ)/lib/libtrdatbuf_lib.a $(LIBDIR)/
+	@test -d $(MODDIR) || mkdir $(MODDIR)
+	@(cd $(MDIR); umask 133; cp $(MODULES) $(MODDIR)/)
+
+uninstall:
+	rm -f $(LIBDIR)/libtrdatbuf_lib.a
+	rm $(BINDIR)/trdatbuf_test
+	(cd $(MODDIR); rm -f $(MODULES))
+
+clean: 
+	@rm -f $(OBJDIR)/*
+	@rm -f $(OBJ)/test/trdatbuf_test
+
+realclean: clean
+	@rm -f $(ARC)
+	@if test -d $(MDIR); then \
+	  (cd $(MDIR); rm -f $(MODULES)); fi
+	@if test -d $(OBJ)/test; then \
+	  (cd $(OBJ)/test; rm -f $(DATA)); fi
+

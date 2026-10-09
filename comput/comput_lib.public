@@ -1,0 +1,8 @@
+# periodic_table_mod module needs to be public ... and others ...
+
+periodic_table.f90
+submsg.f90
+lincir_contour.f90
+plasma_hash_code.f90
+ode.f90
+nnmod.f90

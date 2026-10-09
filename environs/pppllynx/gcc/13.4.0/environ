@@ -1,0 +1,64 @@
+module purge
+
+module load gcc-runtime/13.4.0
+export FLIBROOT="${GCC_RUNTIME_ROOT}/lib"
+export LD_LIBRARY_PATH=${FLIBROOT}:$LD_LIBRARY_PATH
+
+module load openmpi/5.0.10-gcc-13.4.0
+
+export GCC10=1
+
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+
+export FORTRAN_COMMAND=${MPIF90}
+export CC_COMMAND=${MPICC}
+export CX_COMMAND=${MPICXX}
+export MPI_CMD="$(echo "$MPIF90" | sed 's/mpif90$/mpiexec/')"
+export MPI_CMD="${MPI_CMD} --bind-to none"
+
+module load netlib-lapack/3.12.1-gcc-13.4.0
+
+export L_BLAS=" -L$NETLIB_LAPACK_HOME/lib64 -lblas"
+export L_LAPACK=" -L$NETLIB_LAPACK_HOME/lib64 -llapack"
+
+module load hdf5/1.14.6-gcc-13.4.0
+export LD_LIBRARY_PATH=$HDF5_HOME/lib:$LD_LIBRARY_PATH
+
+module load netcdf-c/4.9.3-gcc-13.4.0
+module load netcdf-cxx4/4.3.1-gcc-13.4.0
+module load netcdf-fortran/4.6.2-gcc-13.4.0
+
+export L_NETCDF=" -L$NETCDF_F_HOME/lib -lnetcdff \
+-L$NETCDF_C_HOME/lib64 -lnetcdf \
+-Wl,-rpath,$HDF5_HOME/lib -L$HDF5_HOME/lib -lhdf5_fortran -lhdf5_hl -lhdf5"
+
+module load pspline/2.0.1-gcc-13.4.0
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export EZCDF_HOME=/p/pshare/transp/opt/ezcdf/0.0.3/gcc/13.4.0
+export LD_LIBRARY_PATH=$EZCDF_HOME/lib:$LD_LIBRARY_PATH
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+export UFILES_ROOT=/p/pshare/transp/opt/ufiles/0.5.0/gcc/13.4.0
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+module load idl
+module load mdsplus/7.153.3
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+export FTN_MAIN=""
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+
+export LOADER_TRAILER=" -L/usr/lib64 -lreadline -lhistory -ltermcap -ldl"

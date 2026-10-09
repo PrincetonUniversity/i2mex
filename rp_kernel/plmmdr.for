@@ -1,0 +1,96 @@
+C-----------------------------------------------------------------------
+C PLMMDR -- COMPUTE MIDPLANE DR'S FOR LINE AVERAGING, FROM MOMENTS DATA
+C
+      SUBROUTINE PLMMDR(ZDRAV,INXI,IT)
+
+      use datmgr_mod
+      use cplotr_mod
+      use plfmpa_mod
+
+      REAL ZDRAV(INXI)  !  OUTPUT DR'S
+      INTEGER IT	 !  TIME INDEX
+C
+C  COMMON BLOCKS---
+C
+C
+C  A FLUX SURFACE INNER INTERCEPT IS R0-R1+R2-R3 + - ...
+C  A FLUX SURFACE OUTER INTERCEPT IS R0+R1+R2+R3 + + ...
+C
+C  THE MOMENTS DATA IS PRESUMED TO HAVE BEEN READ IN TO COMMON !!!
+C
+C  ZRMINP = THE HALF-WIDTH OF THE PRECEEDING SURFACE
+C  AXIS HALF-WIDTH = 0.0
+C
+      IF(IMMGEO.EQ.1) GO TO 500
+C----------------------------
+C  MOD DMC 1 APR 1994:  DIFFERENT TREATMENT FOR UPDOWN
+C  ASYMMETRIC GEOMETRIES.  SEE BELOW.
+C
+C  UPDOWN SYMMETRY HERE:
+C
+      ZRMINP=0.0
+C
+      DO 100 IX=1,INXI
+C
+        IR0=NDPTR(ILR0,INX,IT)+IX-1
+        ZR0=DATBUF(IR0)
+C
+        ZRINNR=ZR0
+        ZROUTR=ZR0
+C
+        DO 20 IM=1,IMOM
+C
+          IRM=NDPTR(ILCMM(1,IM),INX,IT)+IX-1
+          ZRM=DATBUF(IRM)
+C
+          ZROUTR=ZROUTR+ZRM
+C
+C  ODD/EVEN TEST
+C
+          IF((2*(IM/2)).EQ.IM) THEN
+            ZRINNR=ZRINNR+ZRM
+          ELSE
+            ZRINNR=ZRINNR-ZRM
+          ENDIF
+C
+ 20     CONTINUE
+C
+        ZRMIN=0.5*(ZROUTR-ZRINNR)
+C
+        ZDRAV(IX)=ZRMIN-ZRMINP
+C
+        ZRMINP=ZRMIN
+ 100  CONTINUE
+      GO TO 999
+C--------------------------------
+C  ASYMMETRIC GEOMETRY:  USE MIDPLANE DATA DIRECTLY
+C
+ 500  CONTINUE
+C
+      ZRMINP=0.0
+      IZP1=INXI+1
+      INMP=IZP1+INXI
+C
+      DO IX=1,INXI
+        IZP=IZP1+IX
+        IZM=IZP1-IX
+C
+        IRP=NDPTR(ILRMP,INMP,IT)+IZP-1
+        IRM=NDPTR(ILRMP,INMP,IT)+IZM-1
+C
+        ZRP=DATBUF(IRP)
+        ZRM=DATBUF(IRM)
+C
+        ZRMIN=0.5*(ZRP-ZRM)
+        ZDRAV(IX)=ZRMIN-ZRMINP
+C
+        ZRMINP=ZRMIN
+C
+      ENDDO
+C
+C-----------------------------
+C  EXIT
+C
+ 999  CONTINUE
+      RETURN
+      END

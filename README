@@ -1,3 +1,158 @@
+# I2MEX Compilation on PPPL Flux
+
+I2MEX is compiled on PPPL Flux using the existing TRANSP build environment and TRANSP library ecosystem.
+
+## Build Environment
+
+Start from the top-level I2MEX source directory.
+
+First purge any currently loaded modules:
+
+```bash
+module purge
+```
+
+Source the TRANSP environment:
+
+```bash
+. ../transp_so/environ
+```
+
+The TRANSP environment defines the compiler, external dependencies, and the common build location through `$LOCAL`.
+
+The current build location can be checked with:
+
+```bash
+echo $LOCAL
+```
+
+The I2MEX environment variables can also be checked with:
+
+```bash
+echo $I2MEX_HOME
+```
+
+## Set TRANSP_ROOT
+
+I2MEX uses libraries from the existing TRANSP build. Set `TRANSP_ROOT` to the build location defined by the TRANSP environment:
+
+```bash
+export TRANSP_ROOT=$LOCAL
+```
+
+Verify it with:
+
+```bash
+echo $TRANSP_ROOT
+```
+
+At this point:
+
+```text
+LOCAL       = TRANSP build/install location
+TRANSP_ROOT = TRANSP build/install location
+```
+
+I2MEX will therefore use the existing TRANSP libraries under:
+
+```text
+$TRANSP_ROOT/lib
+```
+
+## Enable Shared Libraries
+
+Set:
+
+```bash
+export MAKE_SO=1
+```
+
+This enables creation of the I2MEX shared library in addition to the static library.
+
+## Compile I2MEX
+
+From the top-level I2MEX source directory, run:
+
+```bash
+make -f Makefile_flux
+```
+
+The complete compilation sequence is therefore:
+
+```bash
+module purge
+
+. ../transp_so/environ
+
+echo $LOCAL
+echo $I2MEX_HOME
+
+export TRANSP_ROOT=$LOCAL
+export MAKE_SO=1
+
+make -f Makefile_flux
+```
+
+## Build Products
+
+The I2MEX libraries are installed in:
+
+```bash
+$LOCAL/lib
+```
+
+They can be checked with:
+
+```bash
+ls -l $LOCAL/lib
+```
+
+In particular, the build should create the I2MEX library under this directory, including `libi2mex.so` when `MAKE_SO=1`.
+
+The I2MEX executables are installed in:
+
+```bash
+$LOCAL/bin
+```
+
+They can be checked with:
+
+```bash
+ls -l $LOCAL/bin
+```
+
+Thus the build uses the same installation tree as the sourced TRANSP environment:
+
+```text
+$LOCAL/
+├── bin/        I2MEX executables
+├── lib/        libi2mex and TRANSP libraries
+├── mod/        Fortran module files
+└── obj/        object files
+```
+
+## Quick Build Procedure
+
+For subsequent builds, the required commands are:
+
+```bash
+module purge
+. ../transp_so/environ
+export TRANSP_ROOT=$LOCAL
+export MAKE_SO=1
+make -f Makefile_flux
+```
+
+After compilation:
+
+```bash
+ls -l $LOCAL/lib
+ls -l $LOCAL/bin
+```
+
+This build configuration intentionally uses the existing TRANSP environment and TRANSP libraries rather than attempting to build all TRANSP dependencies independently inside the I2MEX repository.
+
+
 I2MEX: ideal 2-d Magnetohydrodynamic Equilibrium on Xplasma
 ===========================================================
 

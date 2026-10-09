@@ -1,0 +1,72 @@
+C******************** START FILE DMGGEO.FOR ; GROUP PLDMGR *************
+C------------------------------------------------------------
+C  DMGGEO
+C
+C  READ TIME-DEPENDENT GEOMETRY INFORMATION INTO DATA AREA
+C  SEE SUBROUTINE IXCALC WHERE DATA GETS USED
+C
+      SUBROUTINE DMGGEO(IINT,IND1,IND2)
+C
+C  IINT-- INPUT CODE FOR UPCOMING OPERATION REQUIRING GEOMETRIC INFO
+C          SEE BELOW
+C
+C  IND1,IND2-- OUTPUT-- PTRS TO DATA AREAS RESERVED
+C
+      use datmgr_mod
+      use cplotr_mod
+C
+      LOGICAL MOMRUN
+C
+C  RETURN IF GEOMETRY IS TIME-INDEPENDENT OR NO INFORMATION IS
+C  REQUIRED
+C
+      IF((IINT.EQ.0).OR.(.NOT.NLTGEO)) RETURN
+C
+      IND1=0
+      IND2=0
+C
+C  DERIVATIVES-- GRADIENTS, SCALE LENGTHS--
+C
+      IF(IINT.EQ.-6) THEN
+        if(lx.gt.0) call dmgfxt(lx,ind1)
+        if(lxb.gt.0) call dmgfxt(lxb,ind2)
+        RETURN
+      else IF(IINT.LT.0) THEN
+        CALL DMGFXT(LDRAV,IND1)
+        if(ldravfac.gt.0) call dmgfxt(ldravfac,ind2)
+        RETURN
+      ENDIF
+C   VOLUME INTEGRAL OR AVERAGE
+      IF((IINT.EQ.1).OR.(IINT.EQ.5).OR.(IINT.EQ.6).OR.
+     >     (IINT.EQ.8).OR.(IINT.EQ.11)) THEN
+        CALL DMGFXT(LDVOL,IND1)
+        RETURN
+      ENDIF
+C   FLUX INTEGRAL
+      IF(IINT.EQ.2) THEN
+        CALL DMGFXT(LDVOL,IND1)
+        CALL DMGFXT(LSURF,IND2)
+        RETURN
+      ENDIF
+C   AREA INTEGRAL
+      IF(IINT.EQ.3) THEN
+        CALL DMGFXT(LDAREA,IND1)
+        RETURN
+      ENDIF
+C   LINE AVERAGE
+      IF((IINT.EQ.4).OR.(IINT.EQ.7)) THEN
+        IF(MOMRUN(IDUM,IGEO)) THEN
+C  MOMENTS RUN -- GET R MOMENTS TO COMPUTE MIDPLANE DL'S
+          IDIM=1
+          IBOOST=0
+          CALL PLMMRD(IDIM,IBOOST)
+        ELSE
+C  NO MOMENTS DATA -- MAKE DO WITH TRANSP DR'S
+          CALL DMGFXT(LDRAV,IND1)
+        ENDIF
+        RETURN
+      ENDIF
+C
+      RETURN
+      END
+C******************** END FILE DMGGEO.FOR ; GROUP PLDMGR ***************

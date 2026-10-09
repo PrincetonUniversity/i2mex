@@ -1,0 +1,52 @@
+MYLIBS=/home/ITER/perumpg/software_gcc10.2
+export BUILD=builds
+export LOCAL=${BUILD}/gcc/10.2.0
+
+export EZCDF_HOME=$MYLIBS/ezcdf/0.0.3/gcc/10.2.0
+export UFILES_ROOT=$MYLIBS/ufiles/0.3.1/gcc/10.2.0
+
+module load IMAS/3.39.0-5.0.0-foss-2020b
+module load PSPLINE/2.0.0-gompi-2020b
+module load netCDF-Fortran/4.5.3-gompi-2020b
+module load netCDF/4.7.4-gompi-2020b
+module load MDSplus/7.96.17-GCCcore-10.2.0
+
+#----------
+export FLIBROOT=$(echo $LD_LIBRARY_PATH | sed 's/:.*//')
+export F90HOME=$GCC_HOME
+export FC=gfortran
+export CC=gcc
+export CXX=g++
+export GCC_PATH=$GCC_HOME
+
+export FTN_TRAILER=" -L$FLIBROOT -lgfortran"
+export CPP_TRAILER=" -L$FLIBROOT -lstdc++ -lgcc_s -lgcc"
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"
+
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+export NETCDF_FORTRAN_HOME=${EBROOTNETCDFMINFORTRAN}
+export NETCDF_C_HOME=$EBROOTNETCDF
+export NETCDFHOME=$NETCDF_FORTRAN_HOME
+export NETCDF_DIR=$EBROOTNETCDF
+export NETCDF_ROOT=$EBROOTNETCDF
+export BLASHOME=/work/imas/opt/EasyBuild/software/OpenBLAS/0.3.12-GCC-10.2.0/ 
+export LAPACKHOME=/work/imas/opt/EasyBuild/software/LAPACK/3.9.1-GCC-10.2.0/
+export SZIP_HOME=$EBROOTSZIP
+export HDF5_HOME=$EBROOTHDF5
+export L_NETCDF=" -L$NETCDF_FORTRAN_HOME/lib -lnetcdff -L$NETCDF_C_HOME/lib -lnetcdf"
+export L_BLAS=" -L$BLASHOME -lopenblas"
+export L_LAPACK=" -L$LAPACKHOME -lopenblas"
+
+export PERL=/usr/bin/perl
+export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+
+export LD_LIBRARY_PATH=$EZCDF_HOME/lib:$LD_LIBRARY_PATH
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+

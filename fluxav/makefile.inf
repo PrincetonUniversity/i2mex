@@ -1,0 +1,105 @@
+#GNU Makefile to build Library libfluxav.a 
+#
+#09/21/00 C. Ludescher
+#
+
+ifneq ($(MAKELEVEL),0)
+# if OBJ was defined for main Makefile one level down
+ifeq ("${OBJ}",".")
+	override OBJ=..
+endif
+endif
+
+# define system dependent flags, etc.
+-include  ../share/Make.local
+include ../share/Make.flags
+
+ifdef DEBUG
+	FFLAGS = $(DFFLAGS)
+endif
+
+
+ARC = $(OBJ)/lib/libfluxav.a
+OBJDIR = $(OBJ)/obj/fluxav
+
+# don't rebuild library if using installed one in $PREFIX 
+ifeq ($(MAKELEVEL),0)
+	THISLIB=$(ARC)
+endif
+
+#=============================================================
+# f90 modules
+Mnams = fluxav.mod
+Mobjs = fluxav.o
+MODS = $(foreach file,$(Mobjs),$(ARC)($(file)))
+
+ifeq ($(MODUP),Y)
+ MODS0=$(foreach m,$(Mnams),$(shell  echo $(m) | tr 'a-z' 'A-Z'))
+ MODULES=$(foreach m,$(MODS0),$(subst .MOD,.$(MODEXT),$(m)))
+else
+ MODULES = $(foreach m,$(Mnams),$(subst .mod,.$(MODEXT),$(m)))
+endif 
+ 
+# fortran archive members
+F  = $(subst .f,.o, $(wildcard *.f)) $(subst .for,.o, $(wildcard *.for)) $(subst .F,.o, $(wildcard *.F))
+F90 = $(subst .f90,.o, $(wildcard *.f90)) $(subst .F90,.o, $(wildcard *.F90))
+FMEM = $(F) $(F90) 
+MEM = $(foreach file,$(FMEM),$(ARC)($(file)))
+
+libs: FORCE $(ARC)
+
+all:  libs 
+	@echo done  
+
+FORCE:
+	@test -d $(OBJ)/lib || mkdir -p $(OBJ)/lib
+	@test -d $(OBJ)/mod || mkdir -p $(OBJ)/mod
+	@test -d $(OBJ)/obj/fluxav || mkdir -p $(OBJ)/obj/fluxav
+ 
+$(ARC): $(MODS) $(MEM)
+	@$(RANLIB) $@ > /dev/null
+
+#pre-process/compile fixed length fortran 90 code
+$(ARC)(%.o): %.F
+	$(F_proc)
+	$(make_ar)
+
+#  compile fixed length fortran 90 code
+$(ARC)(%.o): %.f
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+$(ARC)(%.o): %.for
+	$(FC) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+#  compile free form fortran 90 code
+$(ARC)(%.o): %.f90
+	$(FC90) $(FFLAGS) $(MODFLAGS) -I./ $(INCFLAGS) $(OUT) $(OBJDIR)/$*.o $<
+	$(make_ar)
+
+# pre-process/compile free form fortran 90 code
+$(ARC)(%.o): %.F90
+	$(F90_proc)
+	$(make_ar)
+
+#
+#---------------------------------------------------
+exec:
+	@echo 
+
+clean: 
+	@rm -f $(OBJDIR)/*
+
+realclean: clean
+	@rm -f $(ARC)
+	@(cd $(MDIR); rm -f $(MODULES))
+
+install:
+	@test -d $(LIBDIR) || mkdir -p $(LIBDIR)
+	@if test -f $(ARC); then \
+	  umask 133; cp $(ARC) $(LIBDIR)/; \
+	else test -f $(LIBDIR)/libfluxav.a || echo ">>> can not find $(ARC)";fi
+
+uninstall:
+	rm -f $(LIBDIR)/libfluxav.a

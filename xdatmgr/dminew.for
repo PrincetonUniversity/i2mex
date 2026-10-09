@@ -1,0 +1,53 @@
+C******************** START FILE DMINEW.FOR ; GROUP DATMGR ******************
+C--------------------------------------------------------
+C  DMINEW
+C
+C  INSERT NEW ENTRY "J" AFTER ENTRY "JPREV"
+C
+      SUBROUTINE DMINEW(JPREV,J,IPRIO)
+      use datmgr_mod
+C
+      JNEXT=LNEXT(JPREV)
+C  CHOOSE AVAILABLE SLOT IN DESCRIPTOR BLOCK
+      J=LAVAIL
+      IF(J.GT.MAXENT) THEN
+        WRITE(LUNDMO,1001)
+ 1001 FORMAT(' ?DATMGR -- DESCRIPTOR BLOCK OVERFLOW')
+        call bad_exit
+      ENDIF
+C  START DATA JUST AFTER PRECEDING ENTRY
+      LOCD(J)=LOCD(JPREV)+NWDS(JPREV)
+C  INITIALIZE WITH ZERO WORDS
+      NWDS(J)=0
+C  RECORD ACCESS
+      LACC(J)=MACC
+C  RECONNECT CHAIN BOTH WAYS
+      LNEXT(JPREV)=J
+      LPREV(JNEXT)=J
+C  STORAGE PRIORITY
+      MPRIO(J)=IPRIO
+C
+      LPREV(J)=JPREV
+      LNEXT(J)=JNEXT
+C
+C  FIND NEXT FREE SLOT
+C
+      IF(LAVAIL.GT.NDENT) THEN
+        LAVAIL=LAVAIL+1
+        NDENT=NDENT+1
+      		    ELSE
+        DO 50 IJ=LAVAIL,NDENT
+          IF(LOCD(IJ).EQ.0) GO TO 60
+ 50     CONTINUE
+        IJ=NDENT+1
+ 60     CONTINUE
+        LAVAIL=IJ
+      ENDIF
+
+#ifdef __DEBUG
+      call dmprin('dminew',1000)
+#endif
+
+      RETURN
+      END
+C******************** END FILE DMINEW.FOR ; GROUP DATMGR ******************

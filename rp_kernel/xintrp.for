@@ -1,0 +1,32 @@
+C******************** START FILE XINTRP.FOR ; GROUP IXCALC ******************
+C------------------------------------------------------------
+C  XINTRP
+C
+C  APPLY INTERPOLATION FACTOR FROM XINFAC TO INTERPOLATE ON
+C  ARRAY ZF
+C
+      REAL FUNCTION XINTRP(ZF,INF,ZINTRP,ZF0)
+C
+      REAL ZF(INF)
+C
+C  ZINTRP BETWEEN 0 AND FLOAT(INF)
+C
+      IF(ZINTRP.LE.1.0) THEN
+        XINTRP=ZINTRP*ZF(1)+(1.0-ZINTRP)*ZF0
+        RETURN
+      ENDIF
+C  CHECK FOR TAKING LAST PT.
+      ZINF=FLOAT(INF)
+      IF(ZINTRP.GE.ZINF) THEN
+        XINTRP=ZF(INF)
+        RETURN
+      ENDIF
+C  NORMAL INTERPOLATION (BTW. 1.0 AND FLOAT(INF))
+      JN=IFIX(ZINTRP)
+      ZREM=ZINTRP-FLOAT(JN)
+      JP1=JN+1
+C
+      XINTRP=ZF(JN)+ZREM*(ZF(JP1)-ZF(JN))
+      RETURN
+      END
+C******************** END FILE XINTRP.FOR ; GROUP IXCALC ******************

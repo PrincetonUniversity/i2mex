@@ -1,0 +1,22 @@
+      SUBROUTINE ULOWER(STR)
+C
+C  CONVERT STR TO LOWER CASE
+C
+      CHARACTER*(*) STR
+C
+      CHARACTER*26 ALPHAB(2)
+C
+      DATA ALPHAB/'abcdefghijklmnopqrstuvwxyz',
+     >              'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/
+C
+C  EXECUTABLE CODE
+C
+      L=LEN(STR)
+C
+      DO 10 I=1,L
+        IA=INDEX(ALPHAB(2),STR(I:I))
+        IF(IA.NE.0) STR(I:I)=ALPHAB(1)(IA:IA)
+ 10   CONTINUE
+C
+      RETURN
+      END

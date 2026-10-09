@@ -1,0 +1,31 @@
+# What is this and do we need it?
+#test -f /p/beast/java/load_share_2.7.bsh && . /p/beast/java/load_share_2.7.bsh
+#if [ -f $TRANSPROOT/jcodesys/example_jcodesysrc.bsh ]; then
+#    . $TRANSPROOT/jcodesys/example_jcodesysrc.bsh
+#    alias cdj="cd $JCODESYSDIR"
+#fi
+
+#--- For machine regression testing web pages
+#export TESTOUTDIR="/u/$USER/w3_html/machine"
+#export TESTOUTADDRESS="http://w3.pppl.gov/~$USER/machine/"
+
+#--- Production system
+#export TRINF=/p/transpgrid/inf_new
+#export TRINF_OLD=/p/transpgrid/inf
+#export TRINF_NEW=/p/transpgrid/inf_new
+#export ARCDIR=/p/transparch/result
+#export HALTDIR /p/transpgrid/suspended
+
+export L_NAG=" -L$LOCAL/lib -lnag_dummy"
+export L_JETPPF=" -L$LOCAL/lib -lnb_dummy"
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+export L_X11=" -lX11"
+export L_FFTW=" -L$FFTW_HOME/lib -lfftw3"
+export L_F2C=" -lf2c"
+export L_PGPLOT=" -L$LOCAL/lib -lpgplot_dummy"
+
+export ISOLVERDIR=$LOCAL/isolver_data
+export PREACTDIR=$LOCAL/preact
+export ADASDIR=$CODESYSDIR/source/adas
+
+export MDS_TRANSP_SERVER=alcdata-transp.psfc.mit.edu

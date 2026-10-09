@@ -1,0 +1,2 @@
+COMPUT contains low level shared computational routines.  These routines
+have no INCLUDE files and no calls to routines outside the COMPUT library.

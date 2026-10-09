@@ -1,0 +1,20 @@
+      INTEGER FUNCTION MCSTR_LASTNB(STR)
+C
+      CHARACTER*(*) STR
+C
+C  FIND LAST NONBLANK IN STRING
+C
+      L=LEN(STR)
+C
+      DO 10 I=L,1,-1
+        IF(STR(I:I).NE.' ') GO TO 20
+ 10   CONTINUE
+C
+      I=1
+C
+ 20   CONTINUE
+C
+      MCSTR_LASTNB=I
+C
+      RETURN
+      END

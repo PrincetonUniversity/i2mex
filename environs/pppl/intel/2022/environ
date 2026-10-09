@@ -1,0 +1,43 @@
+module purge
+
+module load git
+
+module load intel/2022.1.2
+export FLIBROOT=/usr/pppl/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib
+
+export FC=ifort
+export CC=icc
+export CXX=icpc
+
+export BLASHOME=$F90HOME/mkl/lib/intel64
+export LAPACKHOME=$BLASHOME
+export L_BLAS=" -L$BLASHOME -lmkl_blas95_lp64"
+export L_LAPACK=" -L$LAPACKHOME -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential"
+
+module load netcdf-c
+module load netcdf-fortran
+export L_NETCDF=" -L$NETCDF_FORTRAN_HOME/lib -lnetcdff -L$NETCDF_C_HOME/lib -lnetcdf"
+
+module load pspline
+export L_PSPLINE=" -L$PSPLINE_HOME/lib -lpspline"
+
+export EZCDF_HOME=/p/pshare/transp/opt/ezcdf/0.0.3/icc/2022
+export L_EZCDF=" -L$EZCDF_HOME/lib -lezcdf"
+
+export UFILES_ROOT=/p/pshare/transp/opt/ufiles/0.3.1/intel/2022
+export LD_LIBRARY_PATH=$UFILES_ROOT/lib:$LD_LIBRARY_PATH
+export L_UFILES=" -L$UFILES_ROOT/lib -luflib_userio -luflib -lr4smlib_userio -lr4smlib -lmds_sub -lufhdf -lmdstransp -linterp_sub -lextrac_sub -ltrgraf -lureadsub -ltokid -lufencod -lufport"
+export L_MDSDUMMY=" -L$UFILES_ROOT/lib -lmds_dummy -lmdstransp -lureadsub -lufencod -lufport"
+export L_SGLIB=" -L$UFILES_ROOT/lib -lsg -ljc -lufport"
+export L_SGDUMMY=" -L$UFILES_ROOT/lib -lsgdummy"
+
+module load mdsplus
+export L_MDSPLUS=" -L$MDSPLUS_DIR/lib -lMdsLib"
+
+export FTN_MAIN=$CCHOME/lib/intel64/for_main.o
+export FTN_TRAILER="-L$FLIBROOT -lifport -lintlc -limf -lifcore -ldl -lm -lirc -lsvml"
+GCC_PATH=$(gcc -print-file-name=libstdc++.a)
+GCC_DIR=$(dirname $GCC_PATH)
+export CPP_TRAILER=" -L$GCC_DIR -lstdc++"
+
+export LOADER_TRAILER=" -L$LOCAL/other -lreadline -lhistory -ltermcap -ldl"

@@ -1,0 +1,63 @@
+C-----------------------------------------------------------------------
+C  TIMCK1  CHECK THAT TIME AXES ARE MONOTONIC INCREASING
+C
+      SUBROUTINE TIMCK1(ZTIME,INT)
+C
+      REAL ZTIME(INT)
+C
+C----------------------------
+C
+      LUNTRM=lunzer(0)
+C
+      IERR=0
+      DO 10 IT=2,INT
+        ITM1=IT-1
+        IF(ZTIME(ITM1).GT.ZTIME(IT)) THEN
+          WRITE(LUNTRM,9901) ITM1,ZTIME(ITM1),IT,ZTIME(IT)
+ 9901 FORMAT(/' % TIME AXIS OUT OF ORDER -- NO RPLOT DATA SMOOTHING:'/
+     >'  TIME(',I5,')=',1PE12.5,', TIME(',I5,')=',1PE12.5)
+          IERR=IERR+1
+        ENDIF
+ 10   CONTINUE
+C
+      IF(IERR.GT.0) RETURN
+C
+C  OK CHECK FOR EQUAL POINTS AND PATCH
+C
+      ZDT=0.0
+      DO 50 IT=2,INT
+        ITM1=IT-1
+        IF(ZTIME(IT).GT.ZTIME(ITM1)) THEN
+          ZDT=ZTIME(IT)-ZTIME(ITM1)
+        ELSE
+C  2 PTS EQUAL; ANY MORE?
+          DO 20 ITT=IT+1,INT
+            IF(ZTIME(ITT).GT.ZTIME(IT)) THEN
+              ZDTI=ZTIME(ITT)-ZTIME(IT)
+      	GO TO 30
+            ENDIF
+ 20       CONTINUE
+          ZDTI=ZDT
+          ITT=INT+1
+C
+ 30       CONTINUE
+          ITL=ITT-1
+          WRITE(LUNTRM,9902) ITM1,ITL,ZTIME(IT)
+ 9902 FORMAT(/' % DUPLICATE TIME POINTS TIME(',I5,' THRU ',I5,')=',
+     >1PE12.5/'   STANDARD FIXUP TAKEN')
+C
+C  FIND SMALL INCREMENT BIG ENUF TO MAKE A DIFFERENCE ...
+          ZDTINC=ZDTI*1.E-5
+ 35       CONTINUE
+          ZDTINC=2.0*ZDTINC
+          DO 40 ITT=IT,ITL
+            ZTIME(ITT)=ZTIME(ITT-1)+ZDTINC
+            IF(ZTIME(ITT).EQ.ZTIME(ITT-1)) GO TO 35
+ 40       CONTINUE
+        ENDIF
+C
+C  OK END OF TIME LOOP
+ 50   CONTINUE
+C
+      RETURN
+      END
