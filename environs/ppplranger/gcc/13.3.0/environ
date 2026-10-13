@@ -165,7 +165,7 @@ export LMPI_SCALAPACK="${L_LAPACK}"
 # ============================================================================
 
 export PSPLINE_HOME="\
-/u/mgorelen/transp_external/opt/pspline/2.0.1/gcc/13.3.0"
+/u/mgorelen/transp_external/opt/pspline/2.2.0/gcc/13.3.1"
 
 export L_PSPLINE="\
 -L${PSPLINE_HOME}/lib \
@@ -179,7 +179,7 @@ export L_PSPLINE="\
 # ============================================================================
 
 export EZCDF_HOME="\
-/u/mgorelen/transp_external/opt/ezcdf/0.0.3/gcc/13.3.0"
+/u/mgorelen/transp_external/opt/ezcdf/0.4.0/gcc/13.3.0"
 
 export L_EZCDF="\
 -L${EZCDF_HOME}/lib \
@@ -193,7 +193,7 @@ export L_EZCDF="\
 # ============================================================================
 
 export UFILES_ROOT="\
-/u/mgorelen/transp_external/opt/ufiles/0.5.0/gcc/13.3.0"
+/u/mgorelen/transp_external/opt/ufiles/0.11.0/gcc/13.3.0"
 
 
 export L_UFILES="\
@@ -277,7 +277,7 @@ export L_MDSPLUS="\
 # ============================================================================
 
 export PLASMA_STATE_ROOT="\
-/u/mgorelen/transp_external/opt/plasma_state/3.4.0/gcc/13.3.0"
+/u/mgorelen/transp_external/opt/plasma_state/3.6.0/gcc/13.3.0"
 
 
 export L_PLASMA_STATE="\
