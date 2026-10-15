@@ -159,7 +159,7 @@ export L_PSPLINE="\
 # UFILES
 # ============================================================================
 
-export UFILES_ROOT="/p/pshare/transp/opt/ufiles/0.10.0/gcc/13.2.0"
+export UFILES_ROOT="/p/pshare/transp/opt/ufiles/1.0.0/gcc/13.2.0"
 
 export L_UFILES="\
 -L${UFILES_ROOT}/lib \
@@ -206,7 +206,7 @@ export L_SGDUMMY="\
 # Plasma State
 # ============================================================================
 
-export PLASMA_STATE_ROOT="/p/pshare/transp/opt/plasma_state/3.6.0/gcc/13.2.0"
+export PLASMA_STATE_ROOT="/p/pshare/transp/opt/plasma_state/3.7.0/gcc/13.2.0"
 
 export L_PLASMA_STATE="\
 -L${PLASMA_STATE_ROOT}/lib \
