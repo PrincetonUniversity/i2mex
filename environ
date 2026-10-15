@@ -157,6 +157,9 @@ else
          " If they are correct, you will need to add this environ file"
     return 1
 fi
+
+export LOCAL=${I2MEX_HOME}/builds/${COMPILER_ENV}/${COMPILER_VER}
+
 source $ENV_FILE
 
 # Reset compiler version variable so that LOCAL is set correctly for generic GCC
@@ -164,7 +167,6 @@ if [ $SITE_ENV = 'generic' ]; then
     COMPILER_VER=`gcc -dumpversion`
 fi
 
-export LOCAL=${I2MEX_HOME}/builds/${COMPILER_ENV}/${COMPILER_VER}
 mkdir -p $LOCAL/{bin,include,lib,mod,obj}
 export PATH=${LOCAL}/bin:${PATH}
 echo "Using LOCAL=${LOCAL}"

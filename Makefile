@@ -1,4 +1,3 @@
-
 # ============================================================================
 # Makefile
 #
@@ -328,7 +327,7 @@ MEX2EQS_OBJ := $(UTIL_OBJDIR)/mex2eqs.o
 # ============================================================================
 # Utility include/module paths
 #
-# Fortran .mod files are compiler-specific. Therefore all external packages
+# Fortran .mod files are compiler-specific.  Therefore all external packages
 # referenced here must have been built with a compiler compatible with FC.
 # ============================================================================
 
@@ -695,7 +694,6 @@ clean:
 	@set -e; \
 	for l in $(LIBS); do \
 		echo "Cleaning $${l}"; \
-		mkdir -p "$(LOCAL)/mod"; \
 		if [ -d "$(ROOT)/$${l}" ] && \
 		   [ -f "$(ROOT)/$${l}/$${l}_makefile.mk" ]; then \
 			cd "$(ROOT)/$${l}"; \
@@ -710,7 +708,6 @@ clean:
 	@if [ -d "$(I2MEX_DIR)" ] && \
 	    [ -f "$(I2MEX_DIR)/i2mex_makefile.mk" ]; then \
 		echo "Cleaning i2mex"; \
-		mkdir -p "$(LOCAL)/mod"; \
 		cd "$(I2MEX_DIR)" && \
 		$(MAKE) --no-print-directory \
 			-f i2mex_makefile.mk \
@@ -734,7 +731,6 @@ realclean:
 	@set -e; \
 	for l in $(LIBS); do \
 		echo "Realclean $${l}"; \
-		mkdir -p "$(LOCAL)/mod"; \
 		if [ -d "$(ROOT)/$${l}" ] && \
 		   [ -f "$(ROOT)/$${l}/$${l}_makefile.mk" ]; then \
 			cd "$(ROOT)/$${l}"; \
@@ -749,7 +745,6 @@ realclean:
 	@if [ -d "$(I2MEX_DIR)" ] && \
 	    [ -f "$(I2MEX_DIR)/i2mex_makefile.mk" ]; then \
 		echo "Realclean i2mex"; \
-		mkdir -p "$(LOCAL)/mod"; \
 		cd "$(I2MEX_DIR)" && \
 		$(MAKE) --no-print-directory \
 			-f i2mex_makefile.mk \
