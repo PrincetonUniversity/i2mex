@@ -206,7 +206,7 @@ export L_SGDUMMY="\
 # Plasma State
 # ============================================================================
 
-export PLASMA_STATE_ROOT="/p/pshare/transp/opt/plasma_state/3.7.0/gcc/13.2.0"
+export PLASMA_STATE_ROOT="/p/pshare/transp/opt/plasma_state/3.8.2/gcc/13.2.0"
 
 export L_PLASMA_STATE="\
 -L${PLASMA_STATE_ROOT}/lib \

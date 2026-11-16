@@ -277,7 +277,7 @@ export L_MDSPLUS="\
 # ============================================================================
 
 export PLASMA_STATE_ROOT="\
-/u/mgorelen/transp_external/opt/plasma_state/3.8.0/gcc/13.3.0"
+/u/mgorelen/transp_external/opt/plasma_state/3.8.2/gcc/13.3.0"
 
 
 export L_PLASMA_STATE="\
