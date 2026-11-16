@@ -201,8 +201,8 @@ SUBROUTINE r8filtr6(X,Y1,Y,N,EPS,NE,EPS2,NEPS2,DELT,IDDF,DDV, &
   real(fp), dimension(n),  intent(in)    :: delt
   real(fp), dimension(ne), intent(in)    :: eps
   real(fp), dimension(*),  intent(in)    :: eps2
-  integer, intent(in) :: ddv
-  integer, intent(in) :: blv
+  real(fp), intent(in) :: ddv
+  real(fp), intent(in) :: blv
   real(fp), intent(in) :: xenda,xendb
   real(fp), intent(out) :: sm
   ! Local variables
